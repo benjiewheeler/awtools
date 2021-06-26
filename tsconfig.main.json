@@ -1,0 +1,15 @@
+{
+	"compilerOptions": {
+		"target": "ES2018",
+		"module": "CommonJS",
+		"lib": ["ES6", "DOM"],
+		"jsx": "react",
+		"outDir": "./dist",
+		"rootDir": "./src",
+		"strict": false,
+		"resolveJsonModule": true,
+		"allowSyntheticDefaultImports": true,
+		"esModuleInterop": true
+	},
+	"exclude": ["./webpack.config.ts"]
+}

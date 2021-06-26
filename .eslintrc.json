@@ -1,0 +1,16 @@
+{
+	"$schema": "https://json.schemastore.org/eslintrc",
+	"env": {
+		"node": false,
+		"browser": true,
+		"es6": true
+	},
+	"extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended", "plugin:react/recommended", "plugin:prettier/recommended"],
+	"parser": "@typescript-eslint/parser",
+	"plugins": ["@typescript-eslint", "@typescript-eslint/eslint-plugin", "prettier"],
+	"parserOptions": {
+		"project": ["./tsconfig.main.json", "./tsconfig.json"],
+		"ecmaVersion": 2018,
+		"sourceType": "module"
+	}
+}
