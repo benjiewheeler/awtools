@@ -1,0 +1,140 @@
+@color-bg-primary    : #2A2A2E;
+@color-bg-secondary  : #212124;
+@color-bg-accent     : #2196F3;
+@color-error         : #F32020;
+@color-text-primary  : #ECECEA;
+@color-text-secondary: #B4B4AC;
+@color-border-primary: #4E4E46;
+
+:root {
+    --bg-primary    : @color-bg-primary;
+    --bg-secondary  : @color-bg-secondary;
+    --bg-accent     : @color-bg-accent;
+    --error         : @color-error;
+    --text-primary  : @color-text-primary;
+    --text-secondary: @color-text-secondary;
+    --border-primary: @color-border-primary;
+}
+
+html,
+body {
+    font-family     : -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    margin          : 0;
+    background-color: var(--bg-primary);
+    color           : var(--text-primary);
+    display         : flex;
+    flex-grow       : 1;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.loading {
+    display        : flex;
+    justify-content: center;
+    padding        : 8px 0;
+
+    &:after {
+        content      : "";
+        display      : block;
+        border       : 8px solid transparent;
+        border-top   : 8px solid var(--bg-accent);
+        border-radius: 50%;
+        width        : 48px;
+        height       : 48px;
+        animation    : spin 2s linear infinite;
+    }
+}
+
+a {
+    text-decoration: none;
+    color          : inherit;
+}
+
+a.link {
+    display: flex;
+}
+
+#root {
+    display  : flex;
+    flex-grow: 1;
+}
+
+.page {
+    display  : flex;
+    flex-flow: column;
+    flex-grow: 1;
+
+    .head {
+        .top-bar {
+            display      : flex;
+            flex-flow    : row;
+            border-bottom: 1px solid #d2d2d01a;
+
+            .nav-link {
+                text-decoration: none;
+                color          : var(--bg-accent);
+                padding        : 1em;
+                align-self     : center;
+
+                &:hover {
+                    background-color: var(--bg-secondary);
+                }
+            }
+        }
+
+        .title {
+            text-align: center;
+        }
+    }
+
+
+    .body {
+        .controls {
+            display        : flex;
+            flex-flow      : row;
+            justify-content: center;
+            padding        : 8px;
+
+            label {
+                align-self: center;
+            }
+
+            .waxid {
+                border          : 1px solid var(--border-primary);
+                background-color: transparent;
+                outline         : none;
+                padding         : 8px;
+                color           : var(--text-primary);
+                border-radius   : 4px;
+                margin          : 0 8px;
+                flex-grow       : 1;
+                max-width       : 450px;
+            }
+
+            .select {
+                border          : none;
+                background-color: var(--bg-accent);
+                outline         : none;
+                padding         : 8px;
+                color           : var(--text-primary);
+                border-radius   : 4px;
+                cursor          : pointer;
+            }
+        }
+
+        .error {
+            display        : flex;
+            justify-content: center;
+            padding        : 16px;
+            color          : var(--error);
+        }
+    }
+}

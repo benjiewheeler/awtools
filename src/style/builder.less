@@ -1,0 +1,146 @@
+@import "./common.less";
+
+.page.builder {
+    .body {
+        .inventory {
+            display  : flex;
+            flex-flow: column;
+            padding  : 8px;
+
+            .holder {
+                display  : flex;
+                flex-flow: row wrap;
+
+                .tool {
+                    display  : flex;
+                    flex-flow: column;
+                    flex-grow: 1;
+                    max-width: 150px;
+                    margin   : 8px;
+
+                    .card {
+                        max-width: 100%;
+                    }
+
+                    .info {
+                        display  : flex;
+                        flex-flow: row;
+                        width    : 100%;
+
+                        .name {
+                            display      : block;
+                            text-overflow: ellipsis;
+                            white-space  : nowrap;
+                            overflow     : hidden;
+                            padding      : 4px;
+                            font-size    : 13px;
+                            margin-right : 4px;
+                            flex-grow    : 1;
+                        }
+
+                        .count {
+                            display    : flex;
+                            padding    : 4px;
+                            font-size  : 13px;
+                            font-weight: bold;
+                        }
+                    }
+                }
+
+            }
+        }
+
+        .builds {
+            display  : flex;
+            flex-flow: column;
+            padding  : 8px;
+
+            .title {
+                .note {
+                    color      : var(--text-secondary);
+                    font-size  : 13px;
+                    font-weight: normal;
+                    display    : block;
+                }
+            }
+
+            .holder {
+                display  : flex;
+                flex-flow: column;
+
+                .build {
+                    display      : flex;
+                    flex-flow    : row;
+                    border-bottom: 1px solid var(--border-primary);
+                    padding      : 8px;
+
+                    .tools {
+                        display   : flex;
+                        flex-flow : column;
+                        flex-basis: 200px;
+
+                        .tool {
+                            display        : flex;
+                            flex-flow      : column;
+                            flex-grow      : 1;
+                            max-width      : 200px;
+                            justify-content: center;
+
+                            .info {
+                                display  : flex;
+                                flex-flow: row;
+                                width    : 100%;
+
+                                .name {
+                                    display      : block;
+                                    text-overflow: ellipsis;
+                                    white-space  : nowrap;
+                                    overflow     : hidden;
+                                    font-size    : 13px;
+                                    flex-grow    : 1;
+                                }
+                            }
+                        }
+                    }
+
+                    .stats {
+                        display        : flex;
+                        flex-flow      : column;
+                        justify-content: center;
+
+                        span {
+                            font-weight: bold;
+
+                            &:before {
+                                margin-right: 8px;
+                                color       : var(--text-secondary);
+                                font-size   : 13px;
+                            }
+                        }
+
+                        .power:before {
+                            content: 'Power';
+                        }
+
+                        .luck:before {
+                            content: 'Luck';
+
+                        }
+
+                        .delay:before {
+                            content: 'Delay';
+                        }
+
+                        .tlm-min:before {
+                            content: 'TLM/Min';
+                        }
+
+                        .luck-min:before {
+                            content: 'NFT/Min';
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

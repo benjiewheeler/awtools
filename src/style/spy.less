@@ -1,0 +1,118 @@
+@import "./common.less";
+
+.page.spy {
+    .body {
+        .balances {
+            display        : flex;
+            flex-flow      : row;
+            justify-content: space-around;
+            padding        : 16px 0;
+
+            .wax,
+            .tlm {
+                span {
+                    font-weight: bold;
+
+                    &:after {
+                        margin-left: 8px;
+                        color      : var(--text-secondary);
+                        font-size  : 13px;
+                    }
+                }
+            }
+
+            .tlm span:after {
+                content: 'TLM';
+            }
+
+            .wax span:after {
+                content: 'WAX';
+
+            }
+        }
+
+        .info {
+            display  : flex;
+            flex-flow: column;
+            padding  : 8px;
+
+            .ram,
+            .cpu,
+            .net {
+                display      : flex;
+                flex-flow    : column;
+                margin-bottom: 8px;
+
+                .title {
+                    font-weight: bold;
+                }
+
+                .progress-bar {
+                    display         : flex;
+                    background-color: var(--bg-secondary);
+                    border-radius   : 4px;
+                    overflow        : hidden;
+
+                    .progress {
+                        display        : flex;
+                        justify-content: flex-end;
+                        font-weight    : bold;
+                        font-size      : 13px;
+                        padding        : 4px 4px;
+                    }
+                }
+
+                .details {
+                    display        : flex;
+                    flex-flow      : row;
+                    justify-content: space-between;
+
+                    span {
+                        font-size: 13px;
+                        color    : var(--text-secondary);
+                    }
+                }
+            }
+
+            .ram .progress-bar .progress {
+                background-color: hsl(210, 50%, 50%);
+            }
+
+            .cpu .progress-bar .progress {
+                background-color: hsl(270, 50%, 50%);
+            }
+
+            .net .progress-bar .progress {
+                background-color: hsl(360, 50%, 50%);
+            }
+        }
+
+        .history {
+            display  : flex;
+            flex-flow: column;
+            padding  : 8px;
+
+            .holder {
+                display  : flex;
+                flex-flow: column;
+
+                .datapoint {
+                    border-bottom  : 1px solid var(--border-primary);
+                    padding        : 8px;
+                    display        : flex;
+                    flex-flow      : row;
+                    justify-content: space-between;
+
+                    .date {
+                        font-size: 13px;
+                        color    : var(--text-secondary);
+                    }
+
+                    .amount {
+                        font-weight: bold;
+                    }
+                }
+            }
+        }
+    }
+}
