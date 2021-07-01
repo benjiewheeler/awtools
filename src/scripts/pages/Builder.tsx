@@ -66,28 +66,16 @@ export class Spy extends BasePage<unknown, BuilderState> {
 				.map<InventoryTool>((a, t) => ({ tool: findTool(t), count: a.length, assets: a.slice(0, 3) }))
 				.filter(t => !_.isNil(t.tool))
 				.flattenDeep()
+				.orderBy([t => t.count], ["desc"])
 				.value();
 
 			this.setState({ loading: false, account, inventory: tools });
-
-			// const toolTemplates = _(tools)
-			// 	.mapKeys(t => t.tool.template)
-			// 	.mapValues(t => Math.min(3, t.count))
-			// 	.value();
-
-			// const powerSetInput = _(toolTemplates)
-			// 	.map((v, k) => Array(v).fill(k))
-			// 	.flatten()
-			// 	.value();
 
 			const powerSetInput = _(tools)
 				.map(t => t.assets)
 				.flatten()
 				.map(a => a.asset)
 				.value();
-
-			// console.log({ inventory, tools, toolTemplates, powerSetInput });
-			console.log({ inventory, tools, powerSetInput });
 
 			const perms: string[] = [];
 			const set: Generator<string[]> = G.powerSet(powerSetInput, 3);
@@ -100,8 +88,6 @@ export class Spy extends BasePage<unknown, BuilderState> {
 					perms.push(combo);
 				}
 			}
-
-			console.log({ perms });
 
 			const builds = _(perms)
 				.uniq()
@@ -117,8 +103,6 @@ export class Spy extends BasePage<unknown, BuilderState> {
 				)
 				.orderBy([tools => tools.length], ["desc"])
 				.value();
-
-			console.log({ builds });
 
 			this.setState({ builds });
 		} catch (error) {
@@ -205,7 +189,9 @@ export class Spy extends BasePage<unknown, BuilderState> {
 							)}
 							{this.state.builds && (
 								<div className="builds">
-									<h2 className="title">Possible Builds</h2>
+									<h2 className="title">
+										Possible Builds <span className="note">Click on the tools names to equip them (set bag)</span>
+									</h2>
 									<table className="holder">
 										<thead className="table-head">
 											<tr>

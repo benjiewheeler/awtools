@@ -57,12 +57,11 @@ export class Inventory extends BasePage<unknown, InventoryState> {
 				.map<InventoryTool>(t => ({ tool: findTool(t.template), count: t.count }))
 				.filter(t => !_.isNil(t.tool))
 				.flattenDeep()
+				.orderBy([t => t.count], ["desc"])
 				.value();
 
 			this.setState({ loading: false, account, inventory: tools });
 		} catch (error) {
-			console.log(error);
-
 			this.setState({ loading: false, error: true });
 		}
 	}

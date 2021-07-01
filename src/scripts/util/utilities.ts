@@ -22,6 +22,8 @@ import {
 	ToolItem,
 } from "../types/types";
 
+const ASSETS_PER_PAGE = 300;
+
 export async function fetchToolAsset(asset: string): Promise<ToolItem> {
 	const key = `asset_${asset}`;
 	const cache = getStorageItem<ToolItem>(key);
@@ -55,8 +57,12 @@ export async function getInventoryTemplates(account: string): Promise<InventoryT
 	return templates;
 }
 
-export async function getInventoryAssets(account: string): Promise<InventoryAssetItem[]> {
-	const key = `inventory_assets_${account}`;
+async function fetchInventoryAssetsPage(account: string, page = 1): Promise<InventoryAssetItem[]> {
+	if (!account?.trim()?.length) {
+		return [];
+	}
+
+	const key = `inventory_assets_${account}_page_${page}`;
 	const cache = getStorageItem<InventoryAssetItem[]>(key);
 	if (cache) {
 		return cache;
@@ -68,8 +74,8 @@ export async function getInventoryAssets(account: string): Promise<InventoryAsse
 			owner: account,
 			collection_name: "alien.worlds",
 			schema_name: "tool.worlds",
-			page: 1,
-			limit: 500,
+			page,
+			limit: ASSETS_PER_PAGE,
 			order: "desc",
 			sort: "transferred",
 		},
@@ -80,7 +86,27 @@ export async function getInventoryAssets(account: string): Promise<InventoryAsse
 		asset: a.asset_id,
 		template: a.template.template_id,
 	}));
+
 	setStorageItem(key, assets, 300);
+	return assets;
+}
+
+export async function getInventoryAssets(account: string): Promise<InventoryAssetItem[]> {
+	let page = 1;
+	const assets: InventoryAssetItem[] = [];
+	const cond = true;
+
+	while (cond) {
+		const assetsPage = await fetchInventoryAssetsPage(account, page);
+
+		assetsPage?.forEach(a => assets.push(a));
+		page++;
+
+		if (assetsPage?.length < ASSETS_PER_PAGE) {
+			break;
+		}
+	}
+
 	return assets;
 }
 
