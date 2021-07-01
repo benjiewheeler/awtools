@@ -64,33 +64,39 @@
                 }
             }
 
+
+
             .holder {
-                display  : flex;
-                flex-flow: column;
+                border-color   : var(--border-primary);
+                border-collapse: collapse;
+
+                .table-head {
+                    background-color: var(--bg-secondary);
+
+                    th {
+                        text-align: left;
+                        padding   : 8px 2px;
+                        cursor    : pointer;
+
+                        &.tools {
+                            cursor: default;
+                        }
+                    }
+                }
 
                 .build {
-                    display      : flex;
-                    flex-flow    : row;
                     border-bottom: 1px solid var(--border-primary);
-                    padding      : 8px;
+
+                    td {
+                        text-align: left;
+                        padding   : 8px 4px;
+                    }
 
                     .tools {
-                        display   : flex;
-                        flex-flow : column;
-                        flex-basis: 200px;
+                        cursor: pointer;
 
                         .tool {
-                            display        : flex;
-                            flex-flow      : column;
-                            flex-grow      : 1;
-                            max-width      : 200px;
-                            justify-content: center;
-
                             .info {
-                                display  : flex;
-                                flex-flow: row;
-                                width    : 100%;
-
                                 .name {
                                     display      : block;
                                     text-overflow: ellipsis;
@@ -100,6 +106,10 @@
                                     flex-grow    : 1;
                                 }
                             }
+                        }
+
+                        &:hover {
+                            background-color: var(--bg-secondary);
                         }
                     }
 

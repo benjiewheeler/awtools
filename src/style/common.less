@@ -95,7 +95,6 @@ a.link {
         }
     }
 
-
     .body {
         .controls {
             display        : flex;
@@ -135,6 +134,61 @@ a.link {
             justify-content: center;
             padding        : 16px;
             color          : var(--error);
+        }
+    }
+
+
+    .foot {
+        display    : flex;
+        flex-flow  : column;
+        align-items: center;
+
+        .potassium-support {
+            display        : flex;
+            flex-flow      : column;
+            justify-content: center;
+            padding        : 1em;
+
+            span,
+            a {
+                color      : var(--text-secondary);
+                font-size  : 13px;
+                text-align : center;
+                line-height: 175%;
+                align-self : center;
+            }
+
+            .wallet-link {
+                background: none;
+                color     : #FBDD11;
+                cursor    : pointer;
+                word-break: break-all;
+            }
+        }
+
+        .credit {
+            width     : 80%;
+            border-top: 1px solid #d2d2d01a;
+            padding   : 1em;
+            text-align: center;
+
+            span,
+            a {
+                color      : var(--text-secondary);
+                font-size  : 13px;
+                text-align : center;
+                line-height: 175%;
+                align-self : center;
+            }
+
+            .discord-link {
+                font-weight: bold;
+                color      : #7289da;
+            }
+
+            .github-link {
+                font-weight: bold;
+            }
         }
     }
 }

@@ -1,0 +1,22 @@
+@import "./common.less";
+
+.page {
+    .body {
+        padding        : 8px;
+        display        : flex;
+        flex-flow      : row;
+        justify-content: space-evenly;
+
+        .link {
+            padding      : 16px;
+            border       : 1px solid var(--border-primary);
+            border-radius: 8px;
+            cursor       : pointer;
+
+            &:hover {
+                background-color: var(--bg-secondary);
+                border-color    : var(--bg-accent);
+            }
+        }
+    }
+}

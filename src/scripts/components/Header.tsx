@@ -1,7 +1,11 @@
 import React from "react";
 
-export class Header extends React.Component<unknown, unknown> {
-	constructor(props: unknown) {
+interface HeaderProps {
+	title: string;
+}
+
+export class Header extends React.Component<HeaderProps, unknown> {
+	constructor(props: HeaderProps) {
 		super(props);
 	}
 
@@ -23,7 +27,7 @@ export class Header extends React.Component<unknown, unknown> {
 					</a>
 				</div>
 
-				<h1 className="title">Alien worlds tool build</h1>
+				<h1 className="title">{this.props.title}</h1>
 			</div>
 		);
 	}

@@ -18,7 +18,8 @@
 		"generatorics": "^1.1.0",
 		"lodash": "^4.17.21",
 		"react": "^16.13.1",
-		"react-dom": "^16.13.1"
+		"react-dom": "^16.13.1",
+		"wax-auth-client": "^0.1.9"
 	},
 	"devDependencies": {
 		"@types/async": "^3.2.5",

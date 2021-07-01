@@ -4,6 +4,7 @@ import webpack from "webpack";
 
 const config: webpack.Configuration = {
 	entry: {
+		index: "./src/scripts/pages/Index.tsx",
 		builder: "./src/scripts/pages/Builder.tsx",
 		inventory: "./src/scripts/pages/Inventory.tsx",
 		spy: "./src/scripts/pages/Spy.tsx",
@@ -26,6 +27,16 @@ const config: webpack.Configuration = {
 	plugins: [
 		new HtmlWebPackPlugin({
 			cache: true,
+			chunks: ["index"],
+			favicon: "./src/images/favicon.png",
+			filename: "./index.html",
+			inject: "body",
+			minify: false,
+			scriptLoading: "blocking",
+			template: "./src/html/index.html",
+		}),
+		new HtmlWebPackPlugin({
+			cache: true,
 			chunks: ["builder"],
 			favicon: "./src/images/favicon.png",
 			filename: "./builder.html",
@@ -34,7 +45,6 @@ const config: webpack.Configuration = {
 			scriptLoading: "blocking",
 			template: "./src/html/index.html",
 		}),
-
 		new HtmlWebPackPlugin({
 			cache: true,
 			chunks: ["inventory"],

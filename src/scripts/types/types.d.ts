@@ -4,7 +4,7 @@ export interface AbstractPageProps {
 	history: History;
 }
 
-export interface InventoryResponse {
+export interface InventoryTemplatesResponse {
 	success: boolean;
 	data: {
 		schemas: {
@@ -18,12 +18,29 @@ export interface InventoryResponse {
 	};
 }
 
-export interface InventoryItem {
+export interface InventoryTemplateItem {
 	template: string;
 	count: number;
 }
 
+export interface InventoryAssetsResponse {
+	success: boolean;
+	data: {
+		asset_id: string;
+		name: string;
+		template: {
+			template_id: string;
+		};
+	}[];
+}
+
+export interface InventoryAssetItem {
+	template: string;
+	asset: string;
+}
+
 export interface InventoryTool {
+	assets?: InventoryAssetItem[];
 	tool: ToolItem;
 	count: number;
 }
@@ -38,6 +55,22 @@ export interface ToolItem {
 	luck: number;
 	difficulty: number;
 	template: string;
+	asset?: string;
+	img: string;
+}
+
+export interface LandItem {
+	asset: string;
+	template: string;
+	name: string;
+	planet: string;
+	coordinates: string;
+	commission: number;
+	rarity: string;
+	delay: number;
+	power: number;
+	luck: number;
+	difficulty: number;
 	img: string;
 }
 
@@ -81,4 +114,40 @@ export interface AccountInfoItem {
 	ram: { total: number; used: number };
 	cpu: { total: number; used: number; staked: number };
 	net: { total: number; used: number; staked: number };
+}
+
+export interface AccountBagResponse {
+	rows: [
+		{
+			account: string;
+			items: string[];
+			locked: number;
+		}
+	];
+}
+
+export interface AccountMinersResponse {
+	rows: [
+		{
+			miner: string;
+			last_mine_tx: string;
+			last_mine: string;
+			current_land: string;
+		}
+	];
+}
+
+export interface AssetInfoResponse {
+	success: boolean;
+	data: {
+		asset_id: string;
+		template: {
+			template_id: string;
+		};
+	};
+}
+
+export interface CacheObject<T> {
+	expiration: number;
+	value: T;
 }

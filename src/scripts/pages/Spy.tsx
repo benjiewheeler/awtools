@@ -1,14 +1,15 @@
+import filesize from "filesize";
 import _ from "lodash";
 import React, { createRef, RefObject } from "react";
 import ReactDOM from "react-dom";
 import "../../style/spy.less";
 import { Error } from "../components/Error";
+import { Footer } from "../components/Footer";
 import { Header } from "../components/Header";
-import { AccountInfoItem, BalanceItem, MineHistoryItem } from "../types/types";
+import { AccountInfoItem, BalanceItem, LandItem, MineHistoryItem, ToolItem } from "../types/types";
 import { URLHashManager } from "../util/URLHashManager";
-import { fetchAccountInfo, fetchBalances, fetchMineHistory } from "../util/utilities";
+import { fetchAccountInfo, fetchBag, fetchBalances, fetchLand, fetchMineHistory } from "../util/utilities";
 import { BasePage } from "./BasePage";
-import filesize from "filesize";
 
 interface SpyState {
 	loading?: boolean;
@@ -17,6 +18,8 @@ interface SpyState {
 	balances?: BalanceItem;
 	miningHistory?: MineHistoryItem[];
 	info?: AccountInfoItem;
+	bag?: ToolItem[];
+	land?: LandItem;
 }
 
 export class Spy extends BasePage<unknown, SpyState> {
@@ -50,17 +53,74 @@ export class Spy extends BasePage<unknown, SpyState> {
 	async fetchAccount(account: string): Promise<void> {
 		this.accountRef.current.value = account;
 
+		this.setState({ loading: true, error: false });
+
 		try {
-			this.setState({ loading: true, error: false });
-
-			const balances = await fetchBalances(account);
-			const history = await fetchMineHistory(account);
-			const info = await fetchAccountInfo(account);
-
-			this.setState({ loading: false, account, balances, info, miningHistory: history });
+			await (async () => {
+				if (this.state.bag && account == this.state.account) {
+					return;
+				}
+				const bag = await fetchBag(account);
+				this.setState({ bag });
+			})();
 		} catch (error) {
 			this.setState({ loading: false, error: true });
+			return;
 		}
+
+		try {
+			await (async () => {
+				if (this.state.land && account == this.state.account) {
+					return;
+				}
+				const land = await fetchLand(account);
+				this.setState({ land });
+			})();
+		} catch (error) {
+			this.setState({ loading: false, error: true });
+			return;
+		}
+
+		try {
+			await (async () => {
+				if (this.state.balances && account == this.state.account) {
+					return;
+				}
+				const balances = await fetchBalances(account);
+				this.setState({ balances });
+			})();
+		} catch (error) {
+			this.setState({ loading: false, error: true });
+			return;
+		}
+
+		try {
+			await (async () => {
+				if (this.state.miningHistory && account == this.state.account) {
+					return;
+				}
+				const history = await fetchMineHistory(account);
+				this.setState({ miningHistory: history });
+			})();
+		} catch (error) {
+			this.setState({ loading: false, error: true });
+			return;
+		}
+
+		try {
+			await (async () => {
+				if (this.state.info && account == this.state.account) {
+					return;
+				}
+				const info = await fetchAccountInfo(account);
+				this.setState({ info });
+			})();
+		} catch (error) {
+			this.setState({ loading: false, error: true });
+			return;
+		}
+
+		this.setState({ loading: false, account });
 	}
 
 	formatCPU(micro = 0): string {
@@ -75,7 +135,7 @@ export class Spy extends BasePage<unknown, SpyState> {
 	render(): JSX.Element {
 		return (
 			<div className="page spy">
-				<Header />
+				<Header title="Alien Worlds spy" />
 				<div className="body">
 					<div className="controls">
 						<label htmlFor="waxid">Account</label>
@@ -159,6 +219,35 @@ export class Spy extends BasePage<unknown, SpyState> {
 									</div>
 								</div>
 							)}
+							{this.state.bag && (
+								<div className="bag">
+									<h2 className="title">Bag</h2>
+									<div className="holder">
+										{this.state.bag.map(t => (
+											<div className="tool" key={`bag-${t?.template}`}>
+												<img src={`https://cloudflare-ipfs.com/ipfs/${t.img}`} className="card" />
+												<div className="info">
+													<span className="name">{t?.name}</span>
+												</div>
+											</div>
+										))}
+									</div>
+								</div>
+							)}
+							{this.state.land && (
+								<div className="land">
+									<h2 className="title">Land</h2>
+									<div className="holder">
+										<div className="land" key={`land-${this.state.land?.asset}`}>
+											<img src={`https://cloudflare-ipfs.com/ipfs/${this.state.land?.img}`} className="card" />
+											<div className="info">
+												<span className="name">{this.state.land?.name}</span>
+												<span className="planet">{`${this.state.land?.planet} (${this.state.land?.coordinates})`}</span>
+											</div>
+										</div>
+									</div>
+								</div>
+							)}
 							{this.state.miningHistory && (
 								<div className="history">
 									<h2 className="title">Mining History</h2>
@@ -175,6 +264,7 @@ export class Spy extends BasePage<unknown, SpyState> {
 						</>
 					)}
 				</div>
+				<Footer />
 			</div>
 		);
 	}

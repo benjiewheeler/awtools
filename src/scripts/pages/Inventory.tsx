@@ -3,10 +3,11 @@ import React, { createRef, RefObject } from "react";
 import ReactDOM from "react-dom";
 import "../../style/Inventory.less";
 import { Error } from "../components/Error";
+import { Footer } from "../components/Footer";
 import { Header } from "../components/Header";
 import { InventoryTool } from "../types/types";
 import { URLHashManager } from "../util/URLHashManager";
-import { findTool, getInventory } from "../util/utilities";
+import { findTool, getInventoryTemplates } from "../util/utilities";
 import { BasePage } from "./BasePage";
 
 interface InventoryState {
@@ -21,7 +22,7 @@ export class Inventory extends BasePage<unknown, InventoryState> {
 
 	constructor(props: unknown) {
 		super(props);
-		this.state = { inventory: [] };
+		this.state = {};
 
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
@@ -50,7 +51,7 @@ export class Inventory extends BasePage<unknown, InventoryState> {
 		try {
 			this.setState({ loading: true, error: false });
 
-			const inventory = await getInventory(account);
+			const inventory = await getInventoryTemplates(account);
 
 			const tools = _(inventory)
 				.map<InventoryTool>(t => ({ tool: findTool(t.template), count: t.count }))
@@ -60,6 +61,8 @@ export class Inventory extends BasePage<unknown, InventoryState> {
 
 			this.setState({ loading: false, account, inventory: tools });
 		} catch (error) {
+			console.log(error);
+
 			this.setState({ loading: false, error: true });
 		}
 	}
@@ -67,7 +70,7 @@ export class Inventory extends BasePage<unknown, InventoryState> {
 	render(): JSX.Element {
 		return (
 			<div className="page inventory">
-				<Header />
+				<Header title="Alien Worlds tools inventory" />
 				<div className="body">
 					<div className="controls">
 						<label htmlFor="waxid">Account</label>
@@ -84,15 +87,14 @@ export class Inventory extends BasePage<unknown, InventoryState> {
 					</div>
 					{this.state.loading && <div className="loading"></div>}
 					{this.state.error && <Error />}
-					{!this.state.loading && !this.state.error && (
+					{this.state.inventory && !this.state.loading && !this.state.error && (
 						<>
 							<div className="inventory">
 								<h2 className="title">Inventory</h2>
 								<div className="holder">
-									{this.state.inventory.map(t => (
+									{this.state.inventory?.map(t => (
 										<div className="tool" key={`inventory-${t?.tool?.template}`}>
 											<img src={`https://cloudflare-ipfs.com/ipfs/${t.tool.img}`} className="card" />
-											{/* <img className="card" /> */}
 											<div className="info">
 												<span className="name">{t?.tool?.name}</span>
 												<span className="count">{t?.count}</span>
@@ -104,6 +106,7 @@ export class Inventory extends BasePage<unknown, InventoryState> {
 						</>
 					)}
 				</div>
+				<Footer />
 			</div>
 		);
 	}
