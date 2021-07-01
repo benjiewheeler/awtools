@@ -7,8 +7,8 @@
 	"author": "Benjamin Wheeler <benjiewheeler@yandex.com>",
 	"private": true,
 	"scripts": {
-		"build.dev": "webpack --progress --cache --mode development",
-		"build.prod": "webpack --cache --mode production",
+		"build.dev": "webpack --progress --mode development",
+		"build.prod": "webpack --mode production",
 		"build.watch": "webpack serve --progress --hot --mode development"
 	},
 	"dependencies": {

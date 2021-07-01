@@ -1,0 +1,6 @@
+[build]
+  publish =  "dist/"
+  command = "sh netlify-build.sh"
+
+[context.production]
+  environment = { }
