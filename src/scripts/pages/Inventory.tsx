@@ -1,7 +1,7 @@
 import _ from "lodash";
 import React, { createRef, RefObject } from "react";
 import ReactDOM from "react-dom";
-import "../../style/Inventory.less";
+import "../../style/inventory.less";
 import { Error } from "../components/Error";
 import { Footer } from "../components/Footer";
 import { Header } from "../components/Header";
