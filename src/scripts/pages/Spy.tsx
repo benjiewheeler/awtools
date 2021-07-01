@@ -27,7 +27,7 @@ export class Spy extends BasePage<unknown, SpyState> {
 
 	constructor(props: unknown) {
 		super(props);
-		this.state = { miningHistory: [] };
+		this.state = {};
 
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
