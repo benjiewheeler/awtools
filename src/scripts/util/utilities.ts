@@ -1,8 +1,8 @@
 import async from "async";
 import axios from "axios";
 import _ from "lodash";
-import awtools from "../../assets/awtools.json";
 import awlands from "../../assets/awlands.json";
+import awtools from "../../assets/awtools.json";
 import "../../style/builder.less";
 import {
 	AccountBagResponse,
@@ -16,6 +16,7 @@ import {
 	InventoryAssetsResponse,
 	InventoryTemplateItem,
 	InventoryTemplatesResponse,
+	InventoryValueResponse,
 	LandItem,
 	MineHistoryItem,
 	MineHistoryResponse,
@@ -180,6 +181,26 @@ export async function fetchMineHistory(account: string): Promise<MineHistoryItem
 		}));
 	setStorageItem(key, history, 120);
 	return history;
+}
+
+export async function fetchInventoryValue(account: string): Promise<number> {
+	const key = `inventory_value_${account}`;
+	const cache = getStorageItem<number>(key);
+	if (cache) {
+		return cache;
+	}
+
+	const url = `https://wax.api.atomicassets.io/atomicmarket/v1/prices/assets`;
+	const response = await axios.get<InventoryValueResponse>(url, {
+		params: { owner: account, collection_name: "alien.worlds", schema_name: "tool.worlds" },
+		timeout: 10e3,
+	});
+
+	const apiData = response?.data?.data[0];
+
+	const data = parseInt(apiData?.suggested_median, 10) / Math.pow(10, apiData?.token_precision);
+	setStorageItem(key, data, 600);
+	return data;
 }
 
 export async function fetchTokenBalance(code: string, account: string, symbol: string): Promise<number> {

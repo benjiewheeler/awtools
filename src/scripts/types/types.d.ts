@@ -151,3 +151,18 @@ export interface CacheObject<T> {
 	expiration: number;
 	value: T;
 }
+
+export interface InventoryValueResponse {
+	success: boolean;
+	data: [
+		{
+			token_precision: number;
+			median: string;
+			average: string;
+			min: string;
+			max: string;
+			suggested_median: string;
+			suggested_average: string;
+		}
+	];
+}

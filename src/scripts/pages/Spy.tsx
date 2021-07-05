@@ -1,6 +1,6 @@
 import filesize from "filesize";
 import _ from "lodash";
-import React, { createRef, RefObject } from "react";
+import React from "react";
 import ReactDOM from "react-dom";
 import "../../style/spy.less";
 import { Error } from "../components/Error";
@@ -8,7 +8,16 @@ import { Footer } from "../components/Footer";
 import { Header } from "../components/Header";
 import { AccountInfoItem, BalanceItem, LandItem, MineHistoryItem, ToolItem } from "../types/types";
 import { URLHashManager } from "../util/URLHashManager";
-import { fetchAccountInfo, fetchBag, fetchBalances, fetchLand, fetchMineHistory } from "../util/utilities";
+import {
+	calculateToolsDelay,
+	calculateToolsLuck,
+	calculateToolsPower,
+	fetchAccountInfo,
+	fetchBag,
+	fetchBalances,
+	fetchLand,
+	fetchMineHistory,
+} from "../util/utilities";
 import { BasePage } from "./BasePage";
 
 interface SpyState {
@@ -23,8 +32,6 @@ interface SpyState {
 }
 
 export class Spy extends BasePage<unknown, SpyState> {
-	private accountRef: RefObject<HTMLInputElement> = createRef();
-
 	constructor(props: unknown) {
 		super(props);
 		this.state = {};
@@ -44,15 +51,7 @@ export class Spy extends BasePage<unknown, SpyState> {
 		}
 	}
 
-	selectAccount(): void {
-		const account = this.accountRef.current.value.trim().toLowerCase();
-
-		this.hashManager.setHashParam(URLHashManager.ACCOUNT_PARAM, account);
-	}
-
 	async fetchAccount(account: string): Promise<void> {
-		this.accountRef.current.value = account;
-
 		this.setState({ loading: true, error: false });
 
 		try {
@@ -132,24 +131,25 @@ export class Spy extends BasePage<unknown, SpyState> {
 		return `${result.toLocaleString("en", { maximumFractionDigits: 2 })} ${units[i]}`;
 	}
 
+	formatTime(seconds: number): string {
+		if (seconds < 0) {
+			return "00:00:00";
+		}
+
+		const units = [Math.floor(seconds / 3600), Math.floor((seconds % 3600) / 60), Math.floor((seconds % 3600) % 60)];
+
+		if (seconds < 3600) {
+			units.shift();
+		}
+
+		return units.map(n => n.toString().padStart(2, "0")).join(":");
+	}
+
 	render(): JSX.Element {
 		return (
 			<div className="page spy">
 				<Header title="Alien Worlds spy" />
 				<div className="body">
-					<div className="controls">
-						<label htmlFor="waxid">Account</label>
-						<input
-							ref={this.accountRef}
-							autoComplete="off"
-							type="text"
-							id="waxid"
-							className="waxid"
-							placeholder="monke.wam"
-							onKeyPress={e => e.key == "Enter" && this.selectAccount()}
-						/>
-						<input type="button" className="select" value="Select" onClick={() => this.selectAccount()} />
-					</div>
 					{this.state.loading && <div className="loading"></div>}
 					{this.state.error && <Error />}
 					{!this.state.loading && !this.state.error && (
@@ -219,12 +219,43 @@ export class Spy extends BasePage<unknown, SpyState> {
 									</div>
 								</div>
 							)}
+							{this.state?.land && this.state?.bag && (
+								<div className="setup">
+									<h2 className="title">Setup</h2>
+									<div className="holder">
+										<div className="charge">
+											<span className="title">Charge Time</span>
+											<span className="value">
+												{this.formatTime(calculateToolsDelay(this.state?.bag) * this.state?.land?.delay)}
+											</span>
+										</div>
+										<div className="power">
+											<span className="title">Mining Power</span>
+											<span className="value">
+												{((calculateToolsPower(this.state?.bag) * this.state?.land?.power) / 100).toLocaleString("en", {
+													style: "percent",
+													maximumFractionDigits: 2,
+												})}
+											</span>
+										</div>
+										<div className="luck">
+											<span className="title">NFT Luck</span>
+											<span className="value">
+												{((calculateToolsLuck(this.state?.bag) * this.state?.land?.luck) / 100).toLocaleString("en", {
+													style: "percent",
+													maximumFractionDigits: 2,
+												})}
+											</span>
+										</div>
+									</div>
+								</div>
+							)}
 							{this.state.bag && (
 								<div className="bag">
 									<h2 className="title">Bag</h2>
 									<div className="holder">
 										{this.state.bag.map(t => (
-											<div className="tool" key={`bag-${t?.template}`}>
+											<div className="tool" key={`bag-${t?.asset}`}>
 												<img src={`https://cloudflare-ipfs.com/ipfs/${t.img}`} className="card" />
 												<div className="info">
 													<span className="name">{t?.name}</span>

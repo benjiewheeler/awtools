@@ -1,15 +1,15 @@
 import G from "generatorics";
 import _ from "lodash";
-import React, { createRef, RefObject } from "react";
+import React from "react";
 import ReactDOM from "react-dom";
 import { WaxAuthClient } from "wax-auth-client";
 import "../../style/builder.less";
 import { Error } from "../components/Error";
 import { Footer } from "../components/Footer";
 import { Header } from "../components/Header";
-import { InventoryTool, ToolItem } from "../types/types";
+import { InventoryTool, LandItem, ToolItem } from "../types/types";
 import { URLHashManager } from "../util/URLHashManager";
-import { calculateToolsDelay, calculateToolsLuck, calculateToolsPower, findTool, getInventoryAssets } from "../util/utilities";
+import { calculateToolsDelay, calculateToolsLuck, calculateToolsPower, fetchLand, findTool, getInventoryAssets } from "../util/utilities";
 import { BasePage } from "./BasePage";
 
 interface BuilderState {
@@ -20,10 +20,10 @@ interface BuilderState {
 	builds?: ToolItem[][];
 	sortParam?: string;
 	order: "asc" | "desc";
+	land?: LandItem;
 }
 
 export class Spy extends BasePage<unknown, BuilderState> {
-	private accountRef: RefObject<HTMLInputElement> = createRef();
 	private auth: WaxAuthClient;
 
 	constructor(props: unknown) {
@@ -39,7 +39,13 @@ export class Spy extends BasePage<unknown, BuilderState> {
 		});
 	}
 
-	componentDidMount(): void {
+	async componentDidMount(): Promise<void> {
+		this.auth.wax.isAutoLoginAvailable().then(autoLogin => {
+			if (autoLogin) {
+				this.auth.loginWax();
+			}
+		});
+
 		const account = this.hashManager.getHashParam(URLHashManager.ACCOUNT_PARAM);
 
 		if (account) {
@@ -47,17 +53,12 @@ export class Spy extends BasePage<unknown, BuilderState> {
 		}
 	}
 
-	selectAccount(): void {
-		const account = this.accountRef.current.value.trim().toLowerCase();
-
-		this.hashManager.setHashParam(URLHashManager.ACCOUNT_PARAM, account);
-	}
-
 	async fetchAccount(account: string): Promise<void> {
-		this.accountRef.current.value = account;
-
 		try {
 			this.setState({ loading: true, error: false });
+
+			const land = await fetchLand(account);
+			this.setState({ land });
 
 			const inventory = await getInventoryAssets(account);
 
@@ -153,19 +154,6 @@ export class Spy extends BasePage<unknown, BuilderState> {
 			<div className="page builder">
 				<Header title="Alien Worlds setup builder" />
 				<div className="body">
-					<div className="controls">
-						<label htmlFor="waxid">Account</label>
-						<input
-							ref={this.accountRef}
-							autoComplete="off"
-							type="text"
-							id="waxid"
-							className="waxid"
-							placeholder="monke.wam"
-							onKeyPress={e => e.key == "Enter" && this.selectAccount()}
-						/>
-						<input type="button" className="select" value="Select" onClick={() => this.selectAccount()} />
-					</div>
 					{this.state.loading && <div className="loading"></div>}
 					{this.state.error && <Error />}
 					{!this.state.loading && !this.state.error && (
@@ -177,13 +165,26 @@ export class Spy extends BasePage<unknown, BuilderState> {
 										{this.state.inventory.map(t => (
 											<div className="tool" key={`inventory-${t?.tool?.template}`}>
 												<img src={`https://cloudflare-ipfs.com/ipfs/${t.tool.img}`} className="card" />
-												{/* <img className="card" /> */}
 												<div className="info">
 													<span className="name">{t?.tool?.name}</span>
 													<span className="count">{t?.count}</span>
 												</div>
 											</div>
 										))}
+									</div>
+								</div>
+							)}
+							{this.state.land && (
+								<div className="land">
+									<h2 className="title">Land</h2>
+									<div className="holder">
+										<div className="land" key={`land-${this.state.land?.asset}`}>
+											<img src={`https://cloudflare-ipfs.com/ipfs/${this.state.land?.img}`} className="card" />
+											<div className="info">
+												<span className="name">{this.state.land?.name}</span>
+												<span className="planet">{`${this.state.land?.planet} (${this.state.land?.coordinates})`}</span>
+											</div>
+										</div>
 									</div>
 								</div>
 							)}
@@ -215,16 +216,23 @@ export class Spy extends BasePage<unknown, BuilderState> {
 										</thead>
 										<tbody>
 											{this.state.builds
-												.map(tools => ({
-													tools,
-													stats: {
-														power: calculateToolsPower(tools),
-														luck: calculateToolsLuck(tools),
-														delay: calculateToolsDelay(tools),
-														tlmmin: calculateToolsPower(tools) / (calculateToolsDelay(tools) / 60),
-														luckmin: calculateToolsLuck(tools) / (calculateToolsDelay(tools) / 60),
-													},
-												}))
+												.map(tools => {
+													const [power, luck, delay] = [
+														calculateToolsPower(tools) * this.state?.land.power,
+														calculateToolsLuck(tools) * this.state?.land.luck,
+														calculateToolsDelay(tools) * this.state?.land.delay,
+													];
+													return {
+														tools,
+														stats: {
+															power,
+															luck,
+															delay,
+															tlmmin: power / (delay / 60),
+															luckmin: luck / (delay / 60),
+														},
+													};
+												})
 												.sort(
 													(a, b) =>
 														(this.state.order === "asc" ? 1 : -1) *

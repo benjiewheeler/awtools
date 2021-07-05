@@ -175,6 +175,40 @@
             }
         }
 
+        .setup {
+            display  : flex;
+            flex-flow: column;
+            padding  : 8px;
+
+            .holder {
+                display        : flex;
+                flex-flow      : row;
+                justify-content: space-between;
+
+                .charge,
+                .power,
+                .luck {
+                    display         : flex;
+                    flex-flow       : column;
+                    flex-basis      : calc(33.33% - 20px);
+                    background-color: var(--bg-secondary);
+                    margin          : 0;
+                    padding         : 8px;
+                    border-radius   : 4px;
+
+                    .title {
+                        font-weight  : bold;
+                        margin-bottom: 16px;
+                    }
+
+                    .value {
+                        font-weight: bold;
+                        color      : var(--bg-accent);
+                    }
+                }
+            }
+        }
+
         .history {
             display  : flex;
             flex-flow: column;

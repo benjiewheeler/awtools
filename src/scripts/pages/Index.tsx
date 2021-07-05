@@ -1,8 +1,8 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import "../../style/index.less";
-import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
+import { Header } from "../components/Header";
 
 export class Index extends React.Component<unknown, unknown> {
 	constructor(props: unknown) {
@@ -11,7 +11,7 @@ export class Index extends React.Component<unknown, unknown> {
 	render(): JSX.Element {
 		return (
 			<div className="page inventory">
-				<Header title="Alien Worlds Tools" />
+				<Header title="Alien Worlds Tools" skipInput={true} />
 				<div className="body">
 					<a href="/inventory" className="link">
 						Inventory

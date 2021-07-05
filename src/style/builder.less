@@ -50,6 +50,53 @@
             }
         }
 
+        .land {
+            display  : flex;
+            flex-flow: column;
+            padding  : 8px;
+
+            .holder {
+                display  : flex;
+                flex-flow: row wrap;
+
+                .land {
+                    display  : flex;
+                    flex-flow: column;
+                    flex-grow: 1;
+                    max-width: 150px;
+                    margin   : 8px;
+
+                    .card {
+                        max-width: 100%;
+                    }
+
+                    .info {
+                        display  : flex;
+                        flex-flow: column;
+
+                        .name {
+                            display      : block;
+                            text-overflow: ellipsis;
+                            white-space  : nowrap;
+                            overflow     : hidden;
+                            padding      : 4px;
+                            font-size    : 13px;
+                            margin-right : 4px;
+                            flex-grow    : 1;
+                        }
+
+                        .planet {
+                            display    : flex;
+                            padding    : 4px;
+                            font-size  : 13px;
+                            font-weight: bold;
+                        }
+                    }
+                }
+
+            }
+        }
+
         .builds {
             display  : flex;
             flex-flow: column;
