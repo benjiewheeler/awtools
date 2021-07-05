@@ -25,6 +25,37 @@ import {
 
 const ASSETS_PER_PAGE = 300;
 
+const ENDPOINTS = {
+	get_actions: [
+		//
+		"https://api.waxsweden.org",
+		"https://wax.cryptolions.io",
+	],
+	get_account: [
+		//
+		"https://api.waxsweden.org",
+		"https://wax.cryptolions.io",
+		"https://wax.eu.eosamsterdam.net",
+		"https://wax.greymass.com",
+		"https://wax.pink.gg",
+	],
+	get_currency_balance: [
+		//
+		"https://api.waxsweden.org",
+		"https://wax.cryptolions.io",
+		"https://wax.eu.eosamsterdam.net",
+		"https://wax.greymass.com",
+		"https://wax.pink.gg",
+	],
+	get_table_rows: [
+		//
+		"https://api.waxsweden.org",
+		"https://wax.cryptolions.io",
+		"https://wax.eu.eosamsterdam.net",
+		"https://wax.pink.gg",
+	],
+};
+
 export async function fetchToolAsset(asset: string): Promise<ToolItem> {
 	const key = `asset_${asset}`;
 	const cache = getStorageItem<ToolItem>(key);
@@ -160,13 +191,22 @@ export async function fetchMineHistory(account: string): Promise<MineHistoryItem
 		return cache;
 	}
 
-	const url = `https://api.waxsweden.org/v2/history/get_actions`;
+	const endpoint = _.sample(ENDPOINTS.get_actions);
+	const url = `${endpoint}/v2/history/get_actions`;
+
+	const today = new Date();
+	today.setHours(0);
+	today.setMinutes(0);
+	today.setSeconds(0);
+	today.setMilliseconds(0);
+
 	const response = await axios.get<MineHistoryResponse>(url, {
 		params: {
 			"account": account,
 			"skip": 0,
 			"limit": 100,
 			"sort": "desc",
+			"after": today.toISOString(),
 			"transfer.to": account,
 			"transfer.from": "m.federation",
 		},
@@ -204,7 +244,8 @@ export async function fetchInventoryValue(account: string): Promise<number> {
 }
 
 export async function fetchTokenBalance(code: string, account: string, symbol: string): Promise<number> {
-	const url = `https://wax.greymass.com/v1/chain/get_currency_balance`;
+	const endpoint = _.sample(ENDPOINTS.get_currency_balance);
+	const url = `${endpoint}/v1/chain/get_currency_balance`;
 	const response = await axios.post<string[]>(url, { code, account, symbol }, { timeout: 10e3 });
 
 	return parseFloat(response?.data?.pop());
@@ -217,7 +258,8 @@ export async function fetchAccountInfo(account: string): Promise<AccountInfoItem
 		return cache;
 	}
 
-	const url = `https://wax.pink.gg/v1/chain/get_account`;
+	const endpoint = _.sample(ENDPOINTS.get_account);
+	const url = `${endpoint}/v1/chain/get_account`;
 	const response = await axios.post<AccountInfoResponse>(url, { account_name: account }, { timeout: 10e3 });
 
 	const info = {
@@ -262,7 +304,8 @@ export async function fetchBag(account: string): Promise<ToolItem[]> {
 		return cache;
 	}
 
-	const url = `https://wax.pink.gg/v1/chain/get_table_rows`;
+	const endpoint = _.sample(ENDPOINTS.get_table_rows);
+	const url = `${endpoint}/v1/chain/get_table_rows`;
 	const response = await axios.post<AccountBagResponse>(
 		url,
 		{
@@ -288,7 +331,8 @@ export async function fetchLand(account: string): Promise<LandItem> {
 		return cache;
 	}
 
-	const url = `https://wax.pink.gg/v1/chain/get_table_rows`;
+	const endpoint = _.sample(ENDPOINTS.get_table_rows);
+	const url = `${endpoint}/v1/chain/get_table_rows`;
 	const response = await axios.post<AccountMinersResponse>(
 		url,
 		{

@@ -198,19 +198,19 @@ export class Spy extends BasePage<unknown, BuilderState> {
 											<tr>
 												<th className="tools">Tools</th>
 												<th onClick={() => this.setSortingParam("power")} className="power">
-													Power
+													Power (%)
 												</th>
 												<th onClick={() => this.setSortingParam("luck")} className="luck">
-													Luck
+													Luck (%)
 												</th>
 												<th onClick={() => this.setSortingParam("delay")} className="delay">
 													Delay
 												</th>
 												<th onClick={() => this.setSortingParam("tlmmin")} className="tlm-min">
-													TLM/Min
+													TLM / Min (%)
 												</th>
 												<th onClick={() => this.setSortingParam("luckmin")} className="luck-min">
-													Luck/Min
+													Luck / Min (%)
 												</th>
 											</tr>
 										</thead>

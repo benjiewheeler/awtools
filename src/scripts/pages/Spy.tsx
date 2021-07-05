@@ -285,7 +285,18 @@ export class Spy extends BasePage<unknown, SpyState> {
 									<div className="holder">
 										{this.state.miningHistory.map((dp, i) => (
 											<div className="datapoint" key={`history-${i}`}>
-												<span className="date">{dp.date.toLocaleString()}</span>
+												<span className="date">
+													{dp.date.toLocaleString("en-gb", {
+														day: "2-digit",
+														hour: "2-digit",
+														hour12: false,
+														minute: "2-digit",
+														month: "short",
+														second: "2-digit",
+														timeZoneName: "short",
+														year: "numeric",
+													})}
+												</span>
 												<span className="amount">{_.round(dp.amount, 4)}</span>
 											</div>
 										))}
