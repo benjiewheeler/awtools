@@ -26,7 +26,7 @@ export class Footer extends React.Component<unknown, unknown> {
 						Benjie#5458
 					</a>
 					<span> | </span>
-					<a href="https://github.com/benjiewheeler/" className="github-link" rel="noreferrer" target="_blank">
+					<a href="https://github.com/benjiewheeler/awtools" className="github-link" rel="noreferrer" target="_blank">
 						benjiewheeler
 					</a>
 				</div>

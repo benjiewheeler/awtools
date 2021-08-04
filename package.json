@@ -1,7 +1,7 @@
 {
 	"name": "awtools",
-	"version": "1.0.2",
-	"description": "A tool to get the best AW builds",
+	"version": "1.0.3",
+	"description": "A tool to get the best AW builds & more",
 	"main": "index.js",
 	"license": "MIT",
 	"author": "Benjamin Wheeler <benjiewheeler@yandex.com>",

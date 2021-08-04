@@ -22,6 +22,9 @@ export class Index extends React.Component<unknown, unknown> {
 					<a href="/spy" className="link">
 						Spy
 					</a>
+					<a href="/monitor" className="link">
+						Monitor
+					</a>
 				</div>
 				<Footer />
 			</div>

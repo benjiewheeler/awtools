@@ -251,11 +251,14 @@ export async function fetchTokenBalance(code: string, account: string, symbol: s
 	return parseFloat(response?.data?.pop());
 }
 
-export async function fetchAccountInfo(account: string): Promise<AccountInfoItem> {
+export async function fetchAccountInfo(account: string, forceFetch = false): Promise<AccountInfoItem> {
 	const key = `info_${account}`;
-	const cache = getStorageItem<AccountInfoItem>(key);
-	if (cache) {
-		return cache;
+
+	if (!forceFetch) {
+		const cache = getStorageItem<AccountInfoItem>(key);
+		if (cache) {
+			return cache;
+		}
 	}
 
 	const endpoint = _.sample(ENDPOINTS.get_account);

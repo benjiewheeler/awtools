@@ -1,0 +1,99 @@
+@import "./common.less";
+
+.page.monitor {
+    .body {
+        .controls {
+            display        : flex;
+            flex-flow      : row;
+            justify-content: center;
+            padding        : 8px;
+            max-width      : 500px;
+            margin         : 0 auto;
+
+            label {
+                align-self: center;
+            }
+
+            .refresh-field {
+                border          : 1px solid var(--border-primary);
+                background-color: transparent;
+                outline         : none;
+                padding         : 8px;
+                color           : var(--text-primary);
+                border-radius   : 4px;
+                margin          : 0 8px;
+                flex-grow       : 1;
+            }
+
+            .refresh-button {
+                border          : none;
+                background-color: var(--bg-accent);
+                outline         : none;
+                padding         : 8px;
+                color           : var(--text-primary);
+                border-radius   : 4px;
+                cursor          : pointer;
+            }
+        }
+
+        .visuals {
+            min-height: 80px;
+        }
+
+        .info {
+            display  : flex;
+            flex-flow: column;
+            padding  : 8px;
+
+            .ram,
+            .cpu,
+            .net {
+                display      : flex;
+                flex-flow    : column;
+                margin-bottom: 8px;
+
+                .title {
+                    font-weight: bold;
+                }
+
+                .progress-bar {
+                    display         : flex;
+                    background-color: var(--bg-secondary);
+                    border-radius   : 4px;
+                    overflow        : hidden;
+
+                    .progress {
+                        display        : flex;
+                        justify-content: flex-end;
+                        font-weight    : bold;
+                        font-size      : 13px;
+                        padding        : 4px 4px;
+                    }
+                }
+
+                .details {
+                    display        : flex;
+                    flex-flow      : row;
+                    justify-content: space-between;
+
+                    span {
+                        font-size: 13px;
+                        color    : var(--text-secondary);
+                    }
+                }
+            }
+
+            .ram .progress-bar .progress {
+                background-color: hsl(210, 50%, 50%);
+            }
+
+            .cpu .progress-bar .progress {
+                background-color: hsl(270, 50%, 50%);
+            }
+
+            .net .progress-bar .progress {
+                background-color: hsl(360, 50%, 50%);
+            }
+        }
+    }
+}

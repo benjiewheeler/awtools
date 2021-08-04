@@ -53,6 +53,9 @@ export class Header extends React.Component<HeaderProps, unknown> {
 					<a href="/spy" className="nav-link">
 						Spy
 					</a>
+					<a href="/monitor" className="nav-link">
+						Monitor
+					</a>
 				</div>
 				<h1 className="title">{this.props.title}</h1>
 				{!this.props.skipInput && (
@@ -80,6 +83,9 @@ export class Header extends React.Component<HeaderProps, unknown> {
 								</a>
 								<a href={`/spy#account=${this.accountRef?.current?.value}`} className="nav-link">
 									Spy
+								</a>
+								<a href={`/monitor#account=${this.accountRef?.current?.value}`} className="nav-link">
+									Monitor
 								</a>
 							</div>
 						)}

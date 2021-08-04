@@ -125,7 +125,7 @@ export class Spy extends BasePage<unknown, SpyState> {
 	formatCPU(micro = 0): string {
 		const units = ["µs", "ms", "s"];
 
-		const i = Math.min(2, Math.floor(Math.log10(micro) / Math.log10(1000)));
+		const i = micro === 0 ? 0 : Math.min(2, Math.floor(Math.log10(micro) / Math.log10(1000)));
 		const result = micro / Math.pow(1000, i);
 
 		return `${result.toLocaleString("en", { maximumFractionDigits: 2 })} ${units[i]}`;
