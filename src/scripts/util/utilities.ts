@@ -33,7 +33,6 @@ const ENDPOINTS = {
 	],
 	get_account: [
 		//
-		"https://api-wax.eosarabia.net",
 		"https://api.wax.alohaeos.com",
 		"https://api.wax.greeneosio.com",
 		"https://api.wax.liquidstudios.io",
