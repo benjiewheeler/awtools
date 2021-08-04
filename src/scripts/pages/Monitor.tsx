@@ -14,17 +14,21 @@ import { BasePage } from "./BasePage";
 interface MonitorState {
 	loading?: boolean;
 	error?: boolean;
+	errorText?: string;
 	account?: string;
 	info?: AccountInfoItem;
 }
 
 export class Monitor extends BasePage<unknown, MonitorState> {
+	private readonly MAX_NO_REFRESH_DELAY = 20 * 60 * 1000;
 	private refreshRef: RefObject<HTMLInputElement> = createRef();
 	private fetchTimeout: number;
+	private lastRefreshTime: number;
 
 	constructor(props: unknown) {
 		super(props);
 		this.state = {};
+		this.lastRefreshTime = 0;
 
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
@@ -33,7 +37,7 @@ export class Monitor extends BasePage<unknown, MonitorState> {
 				this.setState({ account: null });
 				return;
 			}
-			this.fetchAccount(e.detail);
+			this.forceRefresh(e.detail);
 		});
 	}
 
@@ -41,25 +45,34 @@ export class Monitor extends BasePage<unknown, MonitorState> {
 		const account = this.hashManager.getHashParam(URLHashManager.ACCOUNT_PARAM);
 
 		if (account) {
-			this.fetchAccount(account);
+			this.forceRefresh(account);
 		}
 	}
 
 	getIntervalValue(type: "half" | "full"): number {
 		const value = parseInt(this.refreshRef?.current?.value, 10) || 10;
 		const interval = type == "full" ? value : value / 2;
-		console.log("getIntervalValue", interval);
-
 		return Math.max(interval, 1) * 1e3;
 	}
 
-	async forceRefresh(): Promise<void> {
-		this.fetchAccount(this.state?.account);
+	async forceRefresh(account?: string): Promise<void> {
+		this.lastRefreshTime = Date.now();
+		this.fetchAccount(account || this.state?.account);
 	}
 
 	async fetchAccount(account: string): Promise<void> {
+		if (this.lastRefreshTime !== 0) {
+			const diff = Date.now() - this.lastRefreshTime;
+
+			if (diff > this.MAX_NO_REFRESH_DELAY) {
+				this.setState({ info: null, error: true, errorText: "Please refresh manually" });
+				document.title = `WAX CPU: Paused`;
+				return;
+			}
+		}
+
 		window.clearTimeout(this.fetchTimeout);
-		this.setState({ loading: true, error: false });
+		this.setState({ loading: true, error: false, errorText: null });
 
 		try {
 			await (async () => {
@@ -69,7 +82,7 @@ export class Monitor extends BasePage<unknown, MonitorState> {
 				document.title = `WAX CPU: ${_.round((info?.cpu?.used / info?.cpu?.total) * 100, 1)}%`;
 			})();
 		} catch (error) {
-			this.setState({ loading: false, error: true });
+			this.setState({ loading: false, error: true, errorText: null });
 			this.fetchTimeout = window.setTimeout(() => this.fetchAccount(account), this.getIntervalValue("half"));
 			return;
 		}
@@ -108,20 +121,26 @@ export class Monitor extends BasePage<unknown, MonitorState> {
 				<div className="body">
 					<div className="visuals">
 						{this.state?.loading && <div className="loading"></div>}
-						{this.state?.error && <Error />}
+						{this.state?.error && <Error text={this.state?.errorText} />}
 					</div>
 					{this.state?.account && (
-						<div className="controls">
-							<label htmlFor="waxid">Refresh interval (seconds)</label>
-							<input ref={this.refreshRef} type="number" defaultValue={10} min={1} max={600} className="refresh-field" />
-							<input
-								disabled={!this.state?.account}
-								type="button"
-								className="refresh-button"
-								value="Refresh"
-								onClick={() => this.forceRefresh()}
-							/>
-						</div>
+						<>
+							<div className="controls">
+								<label htmlFor="waxid">Refresh interval (seconds)</label>
+								<input ref={this.refreshRef} type="number" defaultValue={10} min={1} max={600} className="refresh-field" />
+								<input
+									disabled={!this.state?.account}
+									type="button"
+									className="refresh-button"
+									value="Refresh"
+									onClick={() => this.forceRefresh()}
+								/>
+							</div>
+							<div className="notice">
+								<span>To avoid forgetting the monitor running for long times, the auto-refresh will stop after 20 minutes</span>
+								<span>You must refresh manually once every 20 minutes to keep the monitor running</span>
+							</div>
+						</>
 					)}
 					{this.state?.account && this.state?.info && (
 						<div className="info">

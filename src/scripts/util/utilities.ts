@@ -33,10 +33,18 @@ const ENDPOINTS = {
 	],
 	get_account: [
 		//
+		"https://api-wax.eosarabia.net",
+		"https://api.wax.alohaeos.com",
+		"https://api.wax.greeneosio.com",
+		"https://api.wax.liquidstudios.io",
 		"https://api.waxsweden.org",
+		"https://wax-bp.wizardsguild.one",
 		"https://wax.cryptolions.io",
+		"https://wax.dapplica.io",
+		"https://wax.eoseoul.io",
+		"https://wax.eosn.io",
+		"https://wax.eosphere.io",
 		"https://wax.eu.eosamsterdam.net",
-		"https://wax.greymass.com",
 		"https://wax.pink.gg",
 	],
 	get_currency_balance: [
@@ -44,7 +52,6 @@ const ENDPOINTS = {
 		"https://api.waxsweden.org",
 		"https://wax.cryptolions.io",
 		"https://wax.eu.eosamsterdam.net",
-		"https://wax.greymass.com",
 		"https://wax.pink.gg",
 	],
 	get_table_rows: [

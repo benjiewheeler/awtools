@@ -2,5 +2,10 @@
   publish =  "dist/"
   command = "sh netlify-build.sh"
 
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
 [context.production]
   environment = { }
