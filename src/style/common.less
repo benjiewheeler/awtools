@@ -165,7 +165,7 @@ a.link {
         flex-flow  : column;
         align-items: center;
 
-        .potassium-support {
+        .support {
             display        : flex;
             flex-flow      : column;
             justify-content: center;
@@ -180,11 +180,26 @@ a.link {
                 align-self : center;
             }
 
+            .banano,
+            .wax {
+                display        : flex;
+                flex-flow      : column;
+                justify-content: center;
+                padding        : 2px;
+            }
+
             .wallet-link {
                 background: none;
-                color     : #FBDD11;
                 cursor    : pointer;
                 word-break: break-all;
+
+                &.banano {
+                    color: #FBDD11;
+                }
+
+                &.wax {
+                    color: #F57F15;
+                }
             }
         }
 

@@ -8,17 +8,25 @@ export class Footer extends React.Component<unknown, unknown> {
 	render(): JSX.Element {
 		return (
 			<div className="foot">
-				<div className="potassium-support">
+				<div className="support">
 					<span>You like it ?</span>
-					<span>Send the author some potassium</span>
-					<a
-						href="https://creeper.banano.cc/explorer/account/ban_1p7fno5eksni6scqji1euce5p36ahaheh43qqyzabfo7azaseejyzqoikchk"
-						className="wallet-link"
-						rel="noreferrer"
-						target="_blank"
-					>
-						ban_1p7fno5eksni6scqji1euce5p36ahaheh43qqyzabfo7azaseejyzqoikchk
-					</a>
+					<div className="banano">
+						<span>Send the author some potassium</span>
+						<a
+							href="https://creeper.banano.cc/explorer/account/ban_1p7fno5eksni6scqji1euce5p36ahaheh43qqyzabfo7azaseejyzqoikchk"
+							className="wallet-link banano"
+							rel="noreferrer"
+							target="_blank"
+						>
+							ban_1p7fno5eksni6scqji1euce5p36ahaheh43qqyzabfo7azaseejyzqoikchk
+						</a>
+					</div>
+					<div className="wax">
+						<span>or some wax</span>
+						<a href="https://wax.bloks.io/account/benjiewaxbag" className="wallet-link wax" rel="noreferrer" target="_blank">
+							benjiewaxbag
+						</a>
+					</div>
 				</div>
 				<div className="credit">
 					<span>Made by </span>

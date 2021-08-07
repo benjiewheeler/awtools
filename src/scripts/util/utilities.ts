@@ -12,6 +12,8 @@ import {
 	AssetInfoResponse,
 	BalanceItem,
 	CacheObject,
+	ChainInfoItem,
+	ChainInfoResponse,
 	InventoryAssetItem,
 	InventoryAssetsResponse,
 	InventoryTemplateItem,
@@ -32,6 +34,21 @@ const ENDPOINTS = {
 		"https://wax.cryptolions.io",
 	],
 	get_account: [
+		//
+		"https://api.wax.alohaeos.com",
+		"https://api.wax.greeneosio.com",
+		"https://api.wax.liquidstudios.io",
+		"https://api.waxsweden.org",
+		"https://wax-bp.wizardsguild.one",
+		"https://wax.cryptolions.io",
+		"https://wax.dapplica.io",
+		"https://wax.eoseoul.io",
+		"https://wax.eosn.io",
+		"https://wax.eosphere.io",
+		"https://wax.eu.eosamsterdam.net",
+		"https://wax.pink.gg",
+	],
+	get_info: [
 		//
 		"https://api.wax.alohaeos.com",
 		"https://api.wax.greeneosio.com",
@@ -210,7 +227,7 @@ export async function fetchMineHistory(account: string): Promise<MineHistoryItem
 		params: {
 			"account": account,
 			"skip": 0,
-			"limit": 100,
+			"limit": 500,
 			"sort": "desc",
 			"after": today.toISOString(),
 			"transfer.to": account,
@@ -289,6 +306,18 @@ export async function fetchAccountInfo(account: string, forceFetch = false): Pro
 		},
 	};
 	setStorageItem(key, info, 60);
+	return info;
+}
+
+export async function fetchChainInfo(): Promise<ChainInfoItem> {
+	const endpoint = _.sample(ENDPOINTS.get_info);
+	const url = `${endpoint}/v1/chain/get_info`;
+	const response = await axios.post<ChainInfoResponse>(url, {}, { timeout: 10e3 });
+
+	const info: ChainInfoItem = {
+		virtualCPULimit: response?.data?.virtual_block_cpu_limit,
+	};
+
 	return info;
 }
 

@@ -6,9 +6,9 @@ import "../../style/monitor.less";
 import { Error } from "../components/Error";
 import { Footer } from "../components/Footer";
 import { Header } from "../components/Header";
-import { AccountInfoItem } from "../types/types";
+import { AccountInfoItem, ChainInfoItem } from "../types/types";
 import { URLHashManager } from "../util/URLHashManager";
-import { fetchAccountInfo } from "../util/utilities";
+import { fetchAccountInfo, fetchChainInfo } from "../util/utilities";
 import { BasePage } from "./BasePage";
 
 interface MonitorState {
@@ -16,7 +16,9 @@ interface MonitorState {
 	error?: boolean;
 	errorText?: string;
 	account?: string;
-	info?: AccountInfoItem;
+	accountInfo?: AccountInfoItem;
+	chainInfo?: ChainInfoItem;
+	titleType?: "cpu" | "chain";
 }
 
 export class Monitor extends BasePage<unknown, MonitorState> {
@@ -27,7 +29,7 @@ export class Monitor extends BasePage<unknown, MonitorState> {
 
 	constructor(props: unknown) {
 		super(props);
-		this.state = {};
+		this.state = { titleType: "cpu" };
 		this.lastRefreshTime = 0;
 
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -49,6 +51,17 @@ export class Monitor extends BasePage<unknown, MonitorState> {
 		}
 	}
 
+	setTitleType(titleType?: "cpu" | "chain"): void {
+		this.setState({ titleType }, () => this.updateTitle());
+	}
+
+	updateTitle(): void {
+		document.title =
+			this.state?.titleType === "cpu"
+				? `Account CPU: ${_.round((this.state?.accountInfo?.cpu?.used / this.state?.accountInfo?.cpu?.total) * 100, 1)}%`
+				: `Chain CPU: ${this.formatCPU(this.state?.chainInfo.virtualCPULimit)}`;
+	}
+
 	getIntervalValue(type: "half" | "full"): number {
 		const value = parseInt(this.refreshRef?.current?.value, 10) || 10;
 		const interval = type == "full" ? value : value / 2;
@@ -65,7 +78,7 @@ export class Monitor extends BasePage<unknown, MonitorState> {
 			const diff = Date.now() - this.lastRefreshTime;
 
 			if (diff > this.MAX_NO_REFRESH_DELAY) {
-				this.setState({ info: null, error: true, errorText: "Please refresh manually" });
+				this.setState({ accountInfo: null, chainInfo: null, error: true, errorText: "Please refresh manually" });
 				document.title = `WAX CPU: Paused`;
 				return;
 			}
@@ -76,19 +89,22 @@ export class Monitor extends BasePage<unknown, MonitorState> {
 
 		try {
 			await (async () => {
-				const info = await fetchAccountInfo(account, true);
-				this.setState({ info });
+				const [accountInfo, chainInfo] = await Promise.all([fetchAccountInfo(account, true), fetchChainInfo()]);
+				this.setState({ accountInfo, chainInfo });
 
-				document.title = `WAX CPU: ${_.round((info?.cpu?.used / info?.cpu?.total) * 100, 1)}%`;
+				document.title =
+					this.state?.titleType === "cpu"
+						? `Account CPU: ${_.round((accountInfo?.cpu?.used / accountInfo?.cpu?.total) * 100, 1)}%`
+						: `Chain CPU: ${this.formatCPU(chainInfo.virtualCPULimit)}`;
 			})();
 		} catch (error) {
 			this.setState({ loading: false, error: true, errorText: null });
-			this.fetchTimeout = window.setTimeout(() => this.fetchAccount(account), this.getIntervalValue("half"));
+			this.fetchTimeout = window.setTimeout(() => this.fetchAccount(this.state?.account), this.getIntervalValue("half"));
 			return;
 		}
 
 		this.setState({ loading: false, account });
-		this.fetchTimeout = window.setTimeout(() => this.fetchAccount(account), this.getIntervalValue("full"));
+		this.fetchTimeout = window.setTimeout(() => this.fetchAccount(this.state?.account), this.getIntervalValue("full"));
 	}
 
 	formatCPU(micro = 0): string {
@@ -126,15 +142,46 @@ export class Monitor extends BasePage<unknown, MonitorState> {
 					{this.state?.account && (
 						<>
 							<div className="controls">
-								<label htmlFor="waxid">Refresh interval (seconds)</label>
-								<input ref={this.refreshRef} type="number" defaultValue={10} min={1} max={600} className="refresh-field" />
-								<input
-									disabled={!this.state?.account}
-									type="button"
-									className="refresh-button"
-									value="Refresh"
-									onClick={() => this.forceRefresh()}
-								/>
+								<div className="line">
+									<label>Refresh interval (seconds)</label>
+									<input ref={this.refreshRef} type="number" defaultValue={10} min={1} max={600} className="refresh-field" />
+									<input
+										disabled={!this.state?.account}
+										type="button"
+										className="refresh-button"
+										value="Refresh"
+										onClick={() => this.forceRefresh()}
+									/>
+								</div>
+								<div className="line">
+									<label className="label">Title</label>
+
+									<label className="radio-label" htmlFor="title-radio-cpu">
+										CPU
+									</label>
+									<input
+										className="title-radio"
+										id="title-radio-cpu"
+										type="radio"
+										name="title"
+										value="Account CPU"
+										defaultChecked={this.state?.titleType == "cpu"}
+										onChange={() => this.setTitleType("cpu")}
+									/>
+
+									<label className="radio-label" htmlFor="title-radio-chain">
+										Chain
+									</label>
+									<input
+										className="title-radio"
+										id="title-radio-chain"
+										type="radio"
+										name="title"
+										value="Chain Limit"
+										defaultChecked={this.state?.titleType == "chain"}
+										onChange={() => this.setTitleType("chain")}
+									/>
+								</div>
 							</div>
 							<div className="notice">
 								<span>To avoid forgetting the monitor running for long times, the auto-refresh will stop after 20 minutes</span>
@@ -142,21 +189,31 @@ export class Monitor extends BasePage<unknown, MonitorState> {
 							</div>
 						</>
 					)}
-					{this.state?.account && this.state?.info && (
+					{this.state?.account && this.state?.accountInfo && (
 						<div className="info">
+							<div className="chain">
+								<span className="title">
+									Chain <span className="note">(Virtual Block CPU Limit)</span>
+								</span>
+								<div className="progress-bar">
+									<div className="progress">{this.formatCPU(this.state?.chainInfo?.virtualCPULimit)}</div>
+								</div>
+							</div>
 							<div className="ram">
 								<span className="title">RAM</span>
 								<div className="progress-bar">
 									<div
 										className="progress"
-										style={{ flexBasis: `${(this.state?.info?.ram?.used / this.state?.info?.ram?.total) * 100}%` }}
+										style={{
+											flexBasis: `${(this.state?.accountInfo?.ram?.used / this.state?.accountInfo?.ram?.total) * 100}%`,
+										}}
 									>
-										{`${_.round((this.state?.info?.ram?.used / this.state?.info?.ram?.total) * 100, 1)}%`}
+										{`${_.round((this.state?.accountInfo?.ram?.used / this.state?.accountInfo?.ram?.total) * 100, 1)}%`}
 									</div>
 								</div>
 								<div className="details">
-									<span className="used">{filesize(this.state?.info?.ram?.used || 0)}</span>
-									<span className="total">{filesize(this.state?.info?.ram?.total || 0)}</span>
+									<span className="used">{filesize(this.state?.accountInfo?.ram?.used || 0)}</span>
+									<span className="total">{filesize(this.state?.accountInfo?.ram?.total || 0)}</span>
 								</div>
 							</div>
 							<div className="cpu">
@@ -164,17 +221,19 @@ export class Monitor extends BasePage<unknown, MonitorState> {
 								<div className="progress-bar">
 									<div
 										className="progress"
-										style={{ flexBasis: `${(this.state?.info?.cpu?.used / this.state?.info?.cpu?.total) * 100}%` }}
+										style={{
+											flexBasis: `${(this.state?.accountInfo?.cpu?.used / this.state?.accountInfo?.cpu?.total) * 100}%`,
+										}}
 									>
-										{`${_.round((this.state?.info?.cpu?.used / this.state?.info?.cpu?.total) * 100, 1)}%`}
+										{`${_.round((this.state?.accountInfo?.cpu?.used / this.state?.accountInfo?.cpu?.total) * 100, 1)}%`}
 									</div>
 								</div>
 								<div className="details">
-									<span className="used">{this.formatCPU(this.state?.info?.cpu?.used)}</span>
+									<span className="used">{this.formatCPU(this.state?.accountInfo?.cpu?.used)}</span>
 									<span className="staked">
-										{`${this.state?.info?.cpu?.staked?.toLocaleString("en", { maximumFractionDigits: 4 })} WAX`}
+										{`${this.state?.accountInfo?.cpu?.staked?.toLocaleString("en", { maximumFractionDigits: 4 })} WAX`}
 									</span>
-									<span className="total">{this.formatCPU(this.state?.info?.cpu?.total)}</span>
+									<span className="total">{this.formatCPU(this.state?.accountInfo?.cpu?.total)}</span>
 								</div>
 							</div>
 							<div className="net">
@@ -182,17 +241,19 @@ export class Monitor extends BasePage<unknown, MonitorState> {
 								<div className="progress-bar">
 									<div
 										className="progress"
-										style={{ flexBasis: `${(this.state?.info?.net?.used / this.state?.info?.net?.total) * 100}%` }}
+										style={{
+											flexBasis: `${(this.state?.accountInfo?.net?.used / this.state?.accountInfo?.net?.total) * 100}%`,
+										}}
 									>
-										{`${_.round((this.state?.info?.net?.used / this.state?.info?.net?.total) * 100, 1)}%`}
+										{`${_.round((this.state?.accountInfo?.net?.used / this.state?.accountInfo?.net?.total) * 100, 1)}%`}
 									</div>
 								</div>
 								<div className="details">
-									<span className="used">{filesize(this.state?.info?.net?.used || 0)}</span>
+									<span className="used">{filesize(this.state?.accountInfo?.net?.used || 0)}</span>
 									<span className="staked">
-										{`${this.state?.info?.net?.staked?.toLocaleString("en", { maximumFractionDigits: 4 })} WAX`}
+										{`${this.state?.accountInfo?.net?.staked?.toLocaleString("en", { maximumFractionDigits: 4 })} WAX`}
 									</span>
-									<span className="total">{filesize(this.state?.info?.net?.total || 0)}</span>
+									<span className="total">{filesize(this.state?.accountInfo?.net?.total || 0)}</span>
 								</div>
 							</div>
 						</div>
