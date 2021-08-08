@@ -142,8 +142,6 @@ export class Spy extends BasePage<unknown, BuilderState> {
 				},
 				{ blocksBehind: 0, expireSeconds: 1200 }
 			);
-
-			console.log({ result });
 		} catch (error) {
 			alert(error);
 		}

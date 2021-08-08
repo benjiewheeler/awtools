@@ -4,9 +4,18 @@ import { HashParams } from "../types/types";
 export class URLHashManager {
 	public static ACCOUNT_CHANGE_EVENT = "account_changed";
 	public static ACCOUNT_PARAM = "account";
+	private static instance: URLHashManager;
 
-	constructor() {
+	private constructor() {
 		window.addEventListener("hashchange", e => this.handleChange(e.oldURL, e.newURL));
+	}
+
+	public static getInstance(): URLHashManager {
+		if (!this.instance) {
+			this.instance = new URLHashManager();
+		}
+
+		return this.instance;
 	}
 
 	private handleChange(oldURL: string, newURL: string, forceEvent = false): void {

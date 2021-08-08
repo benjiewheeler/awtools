@@ -12,7 +12,7 @@ export class Header extends React.Component<HeaderProps, unknown> {
 
 	constructor(props: HeaderProps) {
 		super(props);
-		this.hashManager = new URLHashManager();
+		this.hashManager = URLHashManager.getInstance();
 
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
@@ -56,6 +56,9 @@ export class Header extends React.Component<HeaderProps, unknown> {
 					<a href="/monitor" className="nav-link">
 						Monitor
 					</a>
+					<a href="/history" className="nav-link">
+						History
+					</a>
 				</div>
 				<h1 className="title">{this.props.title}</h1>
 				{!this.props.skipInput && (
@@ -86,6 +89,9 @@ export class Header extends React.Component<HeaderProps, unknown> {
 								</a>
 								<a href={`/monitor#account=${this.accountRef?.current?.value}`} className="nav-link">
 									Monitor
+								</a>
+								<a href={`/history#account=${this.accountRef?.current?.value}`} className="nav-link">
+									History
 								</a>
 							</div>
 						)}

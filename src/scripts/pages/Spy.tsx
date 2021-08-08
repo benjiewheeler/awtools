@@ -6,7 +6,7 @@ import "../../style/spy.less";
 import { Error } from "../components/Error";
 import { Footer } from "../components/Footer";
 import { Header } from "../components/Header";
-import { AccountInfoItem, BalanceItem, LandItem, MineHistoryItem, ToolItem } from "../types/types";
+import { AccountInfoItem, BalanceItem, LandItem, ToolItem } from "../types/types";
 import { URLHashManager } from "../util/URLHashManager";
 import {
 	calculateToolsDelay,
@@ -16,7 +16,6 @@ import {
 	fetchBag,
 	fetchBalances,
 	fetchLand,
-	fetchMineHistory,
 } from "../util/utilities";
 import { BasePage } from "./BasePage";
 
@@ -25,7 +24,6 @@ interface SpyState {
 	error?: boolean;
 	account?: string;
 	balances?: BalanceItem;
-	miningHistory?: MineHistoryItem[];
 	info?: AccountInfoItem;
 	bag?: ToolItem[];
 	land?: LandItem;
@@ -87,19 +85,6 @@ export class Spy extends BasePage<unknown, SpyState> {
 				}
 				const balances = await fetchBalances(account);
 				this.setState({ balances });
-			})();
-		} catch (error) {
-			this.setState({ loading: false, error: true });
-			return;
-		}
-
-		try {
-			await (async () => {
-				if (this.state.miningHistory && account == this.state.account) {
-					return;
-				}
-				const history = await fetchMineHistory(account);
-				this.setState({ miningHistory: history });
 			})();
 		} catch (error) {
 			this.setState({ loading: false, error: true });
@@ -276,30 +261,6 @@ export class Spy extends BasePage<unknown, SpyState> {
 												<span className="planet">{`${this.state.land?.planet} (${this.state.land?.coordinates})`}</span>
 											</div>
 										</div>
-									</div>
-								</div>
-							)}
-							{this.state.miningHistory && (
-								<div className="history">
-									<h2 className="title">Mining History</h2>
-									<div className="holder">
-										{this.state.miningHistory.map((dp, i) => (
-											<div className="datapoint" key={`history-${i}`}>
-												<span className="date">
-													{dp.date.toLocaleString("en-gb", {
-														day: "2-digit",
-														hour: "2-digit",
-														hour12: false,
-														minute: "2-digit",
-														month: "short",
-														second: "2-digit",
-														timeZoneName: "short",
-														year: "numeric",
-													})}
-												</span>
-												<span className="amount">{_.round(dp.amount, 4)}</span>
-											</div>
-										))}
 									</div>
 								</div>
 							)}

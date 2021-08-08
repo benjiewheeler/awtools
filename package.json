@@ -1,6 +1,6 @@
 {
 	"name": "awtools",
-	"version": "1.0.5",
+	"version": "1.0.7",
 	"description": "A tool to get the best AW builds & more",
 	"main": "index.js",
 	"license": "MIT",
@@ -14,10 +14,13 @@
 	"dependencies": {
 		"async": "^3.2.0",
 		"axios": "^0.21.1",
+		"chart.js": "^3.5.0",
 		"filesize": "^6.3.0",
 		"generatorics": "^1.1.0",
 		"lodash": "^4.17.21",
+		"moment": "^2.29.1",
 		"react": "^16.13.1",
+		"react-chartjs-2": "^3.0.4",
 		"react-dom": "^16.13.1",
 		"wax-auth-client": "^0.1.9"
 	},

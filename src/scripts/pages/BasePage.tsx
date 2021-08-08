@@ -6,6 +6,6 @@ export class BasePage<P = unknown, S = unknown> extends React.Component<P, S> {
 
 	constructor(props: P) {
 		super(props);
-		this.hashManager = new URLHashManager();
+		this.hashManager = URLHashManager.getInstance();
 	}
 }

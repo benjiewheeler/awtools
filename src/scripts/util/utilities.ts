@@ -30,6 +30,8 @@ const ASSETS_PER_PAGE = 300;
 const ENDPOINTS = {
 	get_actions: [
 		//
+		"https://wax.eosphere.io",
+		"https://wax.eu.eosamsterdam.net",
 		"https://api.waxsweden.org",
 		"https://wax.cryptolions.io",
 	],
