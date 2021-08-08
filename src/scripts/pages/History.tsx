@@ -168,11 +168,13 @@ export class History extends BasePage<unknown, HistoryState> {
 									<div className="chart">
 										<h2 className="title">Chart</h2>
 										<div className="holder">
-											<Bar
-												data={this.state?.chartData}
-												options={this.state?.chartOptions}
-												style={{ maxHeight: 500, maxWidth: 1000 }}
-											/>
+											<div className="container">
+												<Bar
+													data={this.state?.chartData}
+													options={this.state?.chartOptions}
+													style={{ maxHeight: 500, maxWidth: 1000, minWidth: 340 }}
+												/>
+											</div>
 										</div>
 									</div>
 									<div className="stats">
