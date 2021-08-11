@@ -2,7 +2,8 @@ import filesize from "filesize";
 import _ from "lodash";
 import React, { createRef, RefObject } from "react";
 import ReactDOM from "react-dom";
-import "../../assets/cpu_alarm.mp3";
+import "../../assets/cpu_alarm_0.mp3";
+import "../../assets/cpu_alarm_1.mp3";
 import "../../style/monitor.less";
 import { Error } from "../components/Error";
 import { Footer } from "../components/Footer";
@@ -21,6 +22,7 @@ interface MonitorState {
 	chainInfo?: ChainInfoItem;
 	titleType?: "cpu" | "chain";
 	enableSound?: boolean;
+	soundIndex?: number;
 }
 
 export class Monitor extends BasePage<unknown, MonitorState> {
@@ -32,7 +34,7 @@ export class Monitor extends BasePage<unknown, MonitorState> {
 
 	constructor(props: unknown) {
 		super(props);
-		this.state = { titleType: "cpu" };
+		this.state = { titleType: "cpu", soundIndex: 0 };
 		this.lastRefreshTime = 0;
 
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -80,13 +82,17 @@ export class Monitor extends BasePage<unknown, MonitorState> {
 		return value;
 	}
 
+	setNotificationSound(index: number): void {
+		this.setState({ soundIndex: index });
+	}
+
 	async forceRefresh(account?: string): Promise<void> {
 		this.lastRefreshTime = Date.now();
 		this.fetchAccount(account || this.state?.account);
 	}
 
 	async playNotification(): Promise<void> {
-		const audio = new Audio("cpu_alarm.mp3");
+		const audio = new Audio(`cpu_alarm_${this.state?.soundIndex}.mp3`);
 		audio.autoplay = true;
 		audio.load();
 		audio.play();
@@ -166,7 +172,7 @@ export class Monitor extends BasePage<unknown, MonitorState> {
 						<>
 							<div className="controls">
 								<div className="line">
-									<label>Refresh interval (seconds)</label>
+									<label>Refresh time (s)</label>
 									<input ref={this.refreshRef} type="number" defaultValue={10} min={1} max={600} className="refresh-field" />
 									<input
 										disabled={!this.state?.account}
@@ -205,9 +211,8 @@ export class Monitor extends BasePage<unknown, MonitorState> {
 									/>
 								</div>
 								<div className="line">
-									<label className="label">Notification</label>
 									<label className="sound-label" htmlFor="sound-checkbox">
-										Enable
+										Enable Sound
 									</label>
 									<input
 										className="sound-checkbox"
@@ -218,18 +223,38 @@ export class Monitor extends BasePage<unknown, MonitorState> {
 									/>
 
 									<label className="sound-label" htmlFor="sound-field">
-										Threshold
+										CPU Threshold
 									</label>
 
 									<input
 										ref={this.soundThresholdRef}
 										className="sound-field"
 										type="number"
+										disabled={!this.state?.enableSound}
 										defaultValue={500}
 										min={10}
 										max={10000}
 										step={10}
 									/>
+								</div>
+								<div className="line">
+									<label className="label">Notification Sound</label>
+									{_.range(2).map(i => (
+										<>
+											<label className="radio-label" htmlFor={`sound-radio-${i}`}>
+												{i + 1}
+											</label>
+											<input
+												className="sound-radio"
+												id={`sound-radio-${i}`}
+												type="radio"
+												name="sound"
+												disabled={!this.state?.enableSound}
+												defaultChecked={this.state?.soundIndex == i}
+												onChange={() => this.setNotificationSound(i)}
+											/>
+										</>
+									))}
 								</div>
 							</div>
 							<div className="notice">

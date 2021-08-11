@@ -25,14 +25,14 @@
                     }
 
                     &.label {
-                        margin-right: 32px;
+                        margin-right: 24px;
                     }
                 }
 
                 .title-radio,
                 .sound-checkbox {
                     align-self  : center;
-                    margin-right: 16px;
+                    margin-right: 12px;
                     cursor      : pointer;
                 }
 
@@ -46,6 +46,11 @@
                     border-radius   : 4px;
                     margin          : 0 8px;
                     flex-grow       : 1;
+
+                    &:disabled {
+                        color       : var(--bg-secondary);
+                        border-color: var(--bg-secondary);
+                    }
                 }
 
                 .refresh-button {
