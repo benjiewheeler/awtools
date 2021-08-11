@@ -1,7 +1,7 @@
 import { ChartData, ChartOptions } from "chart.js";
 import _ from "lodash";
 import moment from "moment";
-import React from "react";
+import React, { createRef, RefObject } from "react";
 import { Bar } from "react-chartjs-2";
 import ReactDOM from "react-dom";
 import "../../style/history.less";
@@ -17,12 +17,15 @@ interface HistoryState {
 	loading?: boolean;
 	error?: boolean;
 	account?: string;
+	date?: Date;
 	miningHistory?: MineHistoryItem[];
 	chartData?: ChartData;
 	chartOptions?: ChartOptions;
 }
 
 export class History extends BasePage<unknown, HistoryState> {
+	private dateRef: RefObject<HTMLInputElement> = createRef();
+
 	constructor(props: unknown) {
 		super(props);
 		this.state = {
@@ -59,6 +62,8 @@ export class History extends BasePage<unknown, HistoryState> {
 					},
 				},
 			},
+
+			date: new Date(),
 		};
 
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -81,10 +86,7 @@ export class History extends BasePage<unknown, HistoryState> {
 
 		try {
 			await (async () => {
-				if (this.state.miningHistory && account == this.state.account) {
-					return;
-				}
-				const history = await fetchMineHistory(account);
+				const history = await fetchMineHistory(account, this.dateRef.current.value);
 				const chartData = _(history)
 					.groupBy(l => new Date(l?.date)?.getHours())
 					.mapValues((v, k) => ({ sum: _(v).sumBy(l => l.amount), count: v.length, hour: parseInt(k, 10) }));
@@ -124,7 +126,7 @@ export class History extends BasePage<unknown, HistoryState> {
 				});
 			})();
 		} catch (error) {
-			this.setState({ loading: false, error: true });
+			this.setState({ account, loading: false, error: true });
 			return;
 		}
 
@@ -154,6 +156,14 @@ export class History extends BasePage<unknown, HistoryState> {
 		return units.map(n => n.toString().padStart(2, "0")).join(":");
 	}
 
+	calculateChange(current: number, previous: number): number {
+		if (!previous) {
+			return 0;
+		}
+
+		return current / previous - 1;
+	}
+
 	render(): JSX.Element {
 		return (
 			<div className="page history">
@@ -161,6 +171,18 @@ export class History extends BasePage<unknown, HistoryState> {
 				<div className="body">
 					{this.state.loading && <div className="loading"></div>}
 					{this.state.error && <Error />}
+					<div className="controls">
+						<div className="line">
+							<label>Date</label>
+							<input
+								ref={this.dateRef}
+								type="date"
+								defaultValue={this.state?.date.toISOString().split("T")[0]}
+								className="date-field"
+								onChange={e => this.fetchAccount(this.state?.account) && this.setState({ date: new Date(e.target.value) })}
+							/>
+						</div>
+					</div>
 					{!this.state.loading && !this.state.error && (
 						<>
 							{this.state.miningHistory && (
@@ -183,25 +205,62 @@ export class History extends BasePage<unknown, HistoryState> {
 											<div className="total">
 												<span className="title">Total TLM</span>
 												<span className="value">
-													{_.round(
-														_(this.state?.miningHistory).sumBy(l => l.amount),
-														4
-													)}
+													{_.round(_(this.state?.miningHistory).sumBy(l => l.amount) || 0, 4)}
 												</span>
 											</div>
 											<div className="count">
 												<span className="title">Mines</span>
-												<span className="value">{this.state?.miningHistory?.length}</span>
+												<span className="value">{this.state?.miningHistory?.length || 0}</span>
+											</div>
+											<div className="average">
+												<span className="title">Average</span>
+												<span className="value">
+													{_.round(
+														_(this.state?.miningHistory)
+															.map(l => l.amount)
+															.mean() || 0,
+														4
+													)}
+												</span>
+											</div>
+											<div className="largest">
+												<span className="title">Largest</span>
+												<span className="value">
+													{_.round(
+														_(this.state?.miningHistory)
+															.map(l => l.amount)
+															.max() || 0,
+														4
+													)}
+												</span>
 											</div>
 										</div>
 									</div>
 									<div className="history">
 										<h2 className="title">Mining History</h2>
 										<div className="holder">
-											{this.state.miningHistory.map((dp, i) => (
+											{this.state.miningHistory.map((dp, i, list) => (
 												<div className="datapoint" key={`history-${i}`}>
 													<span className="date">{moment(dp.date).format("DD MMM YYYY, HH:mm:ss zz")}</span>
-													<span className="amount">{_.round(dp.amount, 4)}</span>
+													<span className="amount">
+														{dp.amount.toLocaleString("en", { minimumFractionDigits: 4, maximumFractionDigits: 4 })}
+													</span>
+													<span
+														className={`change ${
+															this.calculateChange(dp.amount, list[i + 1]?.amount) > 0
+																? "positive"
+																: this.calculateChange(dp.amount, list[i + 1]?.amount) < 0
+																? "negative"
+																: ""
+														}`}
+													>
+														{this.calculateChange(dp.amount, list[i + 1]?.amount) > 0 ? "+" : ""}
+														{this.calculateChange(dp.amount, list[i + 1]?.amount).toLocaleString("en", {
+															style: "percent",
+															maximumFractionDigits: 2,
+															minimumFractionDigits: 2,
+														})}
+													</span>
 												</div>
 											))}
 										</div>

@@ -209,8 +209,8 @@ export function calculateToolsDelay(tools: ToolItem[]): number {
 	return _.sum(delays) - _.min(delays);
 }
 
-export async function fetchMineHistory(account: string): Promise<MineHistoryItem[]> {
-	const key = `history_${account}`;
+export async function fetchMineHistory(account: string, date: string): Promise<MineHistoryItem[]> {
+	const key = `history_${account}_${date}`;
 	const cache = getStorageItem<MineHistoryItem[]>(key);
 	if (cache) {
 		return cache;
@@ -219,11 +219,13 @@ export async function fetchMineHistory(account: string): Promise<MineHistoryItem
 	const endpoint = _.sample(ENDPOINTS.get_actions);
 	const url = `${endpoint}/v2/history/get_actions`;
 
-	const today = new Date();
-	today.setHours(0);
-	today.setMinutes(0);
-	today.setSeconds(0);
-	today.setMilliseconds(0);
+	const dayStart = new Date(date);
+	dayStart.setHours(0);
+	dayStart.setMinutes(0);
+	dayStart.setSeconds(0);
+	dayStart.setMilliseconds(0);
+
+	const dayEnd = new Date(dayStart.getTime() + 864e5 - 1);
 
 	const response = await axios.get<MineHistoryResponse>(url, {
 		params: {
@@ -231,7 +233,8 @@ export async function fetchMineHistory(account: string): Promise<MineHistoryItem
 			"skip": 0,
 			"limit": 500,
 			"sort": "desc",
-			"after": today.toISOString(),
+			"after": dayStart.toISOString(),
+			"before": dayEnd.toISOString(),
 			"transfer.to": account,
 			"transfer.from": "m.federation",
 		},
@@ -244,7 +247,8 @@ export async function fetchMineHistory(account: string): Promise<MineHistoryItem
 			date: new Date(`${m.timestamp}Z`),
 			amount: m?.act?.data?.amount,
 		}));
-	setStorageItem(key, history, 120);
+
+	setStorageItem(key, history, Date.now() - dayStart.getTime() > 864e5 ? 3600 : 10);
 	return history;
 }
 

@@ -2,6 +2,57 @@
 
 .page.history {
     .body {
+        .controls {
+            display        : flex;
+            flex-flow      : column;
+            justify-content: center;
+            max-width      : 500px;
+            margin         : 0 auto;
+
+            .line {
+                display        : flex;
+                padding        : 8px;
+                flex-flow      : row;
+                justify-content: center;
+
+                label {
+                    align-self: center;
+
+                    &.radio-label {
+                        color    : var(--text-secondary);
+                        font-size: 15px;
+                    }
+
+                    &.label {
+                        margin-right: 32px;
+                    }
+                }
+
+
+
+                .date-field {
+                    border          : 1px solid var(--border-primary);
+                    background-color: transparent;
+                    outline         : none;
+                    padding         : 8px;
+                    color           : var(--text-primary);
+                    border-radius   : 4px;
+                    margin          : 0 8px;
+                    flex-grow       : 0;
+                }
+
+                .refresh-button {
+                    border          : none;
+                    background-color: var(--bg-accent);
+                    outline         : none;
+                    padding         : 8px;
+                    color           : var(--text-primary);
+                    border-radius   : 4px;
+                    cursor          : pointer;
+                }
+            }
+        }
+
         .chart {
             display  : flex;
             flex-flow: column;
@@ -30,7 +81,9 @@
                 justify-content: space-evenly;
 
                 .total,
-                .count {
+                .count,
+                .average,
+                .largest {
                     display         : flex;
                     flex-flow       : column;
                     flex-basis      : calc(33.33% - 20px);
@@ -38,6 +91,7 @@
                     margin          : 0;
                     padding         : 8px;
                     border-radius   : 4px;
+                    margin          : 0 4px;
 
                     .title {
                         font-weight  : bold;
@@ -62,19 +116,40 @@
                 flex-flow: column;
 
                 .datapoint {
-                    border-bottom  : 1px solid var(--border-primary);
-                    padding        : 8px;
-                    display        : flex;
-                    flex-flow      : row;
-                    justify-content: space-between;
+                    border-bottom: 1px solid var(--border-primary);
+                    padding      : 8px;
+                    display      : flex;
+                    flex-flow    : row;
 
                     .date {
-                        font-size: 13px;
-                        color    : var(--text-secondary);
+                        align-self: center;
+                        font-size : 13px;
+                        color     : var(--text-secondary);
+                        flex-grow : 1;
                     }
 
                     .amount {
+                        align-self : center;
                         font-weight: bold;
+                    }
+
+                    .change {
+                        background-color: var(--border-primary);
+                        padding         : 2px;
+                        font-size       : 12px;
+                        align-self      : center;
+                        border-radius   : 4px;
+                        margin-left     : 8px;
+                        flex-basis      : 69px;
+                        text-align      : center;
+
+                        &.positive {
+                            background-color: #266e26;
+                        }
+
+                        &.negative {
+                            background-color: #943333;
+                        }
                     }
                 }
             }
