@@ -2,6 +2,7 @@ import filesize from "filesize";
 import _ from "lodash";
 import React, { createRef, RefObject } from "react";
 import ReactDOM from "react-dom";
+import "../../assets/cpu_alarm.mp3";
 import "../../style/monitor.less";
 import { Error } from "../components/Error";
 import { Footer } from "../components/Footer";
@@ -19,11 +20,13 @@ interface MonitorState {
 	accountInfo?: AccountInfoItem;
 	chainInfo?: ChainInfoItem;
 	titleType?: "cpu" | "chain";
+	enableSound?: boolean;
 }
 
 export class Monitor extends BasePage<unknown, MonitorState> {
 	private readonly MAX_NO_REFRESH_DELAY = 20 * 60 * 1000;
 	private refreshRef: RefObject<HTMLInputElement> = createRef();
+	private soundThresholdRef: RefObject<HTMLInputElement> = createRef();
 	private fetchTimeout: number;
 	private lastRefreshTime: number;
 
@@ -55,6 +58,10 @@ export class Monitor extends BasePage<unknown, MonitorState> {
 		this.setState({ titleType }, () => this.updateTitle());
 	}
 
+	setEnableSound(enabled: boolean): void {
+		this.setState({ enableSound: enabled });
+	}
+
 	updateTitle(): void {
 		document.title =
 			this.state?.titleType === "cpu"
@@ -68,9 +75,22 @@ export class Monitor extends BasePage<unknown, MonitorState> {
 		return Math.max(interval, 1) * 1e3;
 	}
 
+	getSoundThresholdValue(): number {
+		const value = parseInt(this.soundThresholdRef?.current?.value, 10) || 500;
+		return value;
+	}
+
 	async forceRefresh(account?: string): Promise<void> {
 		this.lastRefreshTime = Date.now();
 		this.fetchAccount(account || this.state?.account);
+	}
+
+	async playNotification(): Promise<void> {
+		const audio = new Audio("cpu_alarm.mp3");
+		audio.autoplay = true;
+		audio.load();
+		audio.play();
+		console.log("PLAYING SOUND");
 	}
 
 	async fetchAccount(account: string): Promise<void> {
@@ -96,6 +116,12 @@ export class Monitor extends BasePage<unknown, MonitorState> {
 					this.state?.titleType === "cpu"
 						? `Account CPU: ${_.round((accountInfo?.cpu?.used / accountInfo?.cpu?.total) * 100, 1)}%`
 						: `Chain CPU: ${this.formatCPU(chainInfo.virtualCPULimit)}`;
+
+				console.log({ enableSound: this.state?.enableSound, chainInfo, notificationThreshold: this.getSoundThresholdValue() });
+
+				if (this.state?.enableSound && chainInfo.virtualCPULimit / 1e3 < this.getSoundThresholdValue()) {
+					this.playNotification();
+				}
 			})();
 		} catch (error) {
 			this.setState({ loading: false, error: true, errorText: null });
@@ -155,7 +181,6 @@ export class Monitor extends BasePage<unknown, MonitorState> {
 								</div>
 								<div className="line">
 									<label className="label">Title</label>
-
 									<label className="radio-label" htmlFor="title-radio-cpu">
 										CPU
 									</label>
@@ -180,6 +205,33 @@ export class Monitor extends BasePage<unknown, MonitorState> {
 										value="Chain Limit"
 										defaultChecked={this.state?.titleType == "chain"}
 										onChange={() => this.setTitleType("chain")}
+									/>
+								</div>
+								<div className="line">
+									<label className="label">Notification</label>
+									<label className="sound-label" htmlFor="sound-checkbox">
+										Enable
+									</label>
+									<input
+										className="sound-checkbox"
+										id="sound-checkbox"
+										type="checkbox"
+										defaultChecked={this.state?.enableSound}
+										onChange={e => this.setEnableSound(e.target.checked)}
+									/>
+
+									<label className="sound-label" htmlFor="sound-field">
+										Threshold
+									</label>
+
+									<input
+										ref={this.soundThresholdRef}
+										className="sound-field"
+										type="number"
+										defaultValue={500}
+										min={10}
+										max={10000}
+										step={10}
 									/>
 								</div>
 							</div>

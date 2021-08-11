@@ -20,6 +20,7 @@ const config: webpack.Configuration = {
 			{ test: /\.less$/i, use: ["style-loader", "css-loader", "less-loader"] },
 			{ test: /\.css$/i, use: ["style-loader", "css-loader"] },
 			{ test: /\.html$/i, use: ["html-loader"] },
+			{ test: /\.mp3$/i, use: [{ loader: "file-loader", options: { name: "[name].[ext]" } }] },
 			{ test: /\.js$/, enforce: "pre", use: ["source-map-loader"] },
 		],
 	},
