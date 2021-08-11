@@ -90,7 +90,6 @@ export class Monitor extends BasePage<unknown, MonitorState> {
 		audio.autoplay = true;
 		audio.load();
 		audio.play();
-		console.log("PLAYING SOUND");
 	}
 
 	async fetchAccount(account: string): Promise<void> {
@@ -116,8 +115,6 @@ export class Monitor extends BasePage<unknown, MonitorState> {
 					this.state?.titleType === "cpu"
 						? `Account CPU: ${_.round((accountInfo?.cpu?.used / accountInfo?.cpu?.total) * 100, 1)}%`
 						: `Chain CPU: ${this.formatCPU(chainInfo.virtualCPULimit)}`;
-
-				console.log({ enableSound: this.state?.enableSound, chainInfo, notificationThreshold: this.getSoundThresholdValue() });
 
 				if (this.state?.enableSound && chainInfo.virtualCPULimit / 1e3 < this.getSoundThresholdValue()) {
 					this.playNotification();
