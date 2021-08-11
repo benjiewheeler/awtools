@@ -6,6 +6,8 @@
   for = "/*.js"
   [headers.values]
     Cache-Control = "public, max-age=86400"
+
+[[headers]]
   for = "/*.mp3"
   [headers.values]
     Cache-Control = "public, max-age=86400"

@@ -1,6 +1,6 @@
 {
 	"name": "awtools",
-	"version": "1.0.13",
+	"version": "1.0.14",
 	"description": "A tool to get the best AW builds & more",
 	"main": "index.js",
 	"license": "MIT",
