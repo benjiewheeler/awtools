@@ -241,7 +241,7 @@ export class Spy extends BasePage<unknown, SpyState> {
 									<div className="holder">
 										{this.state.bag.map(t => (
 											<div className="tool" key={`bag-${t?.asset}`}>
-												<img src={`https://cloudflare-ipfs.com/ipfs/${t.img}`} className="card" />
+												<img src={`https://ipfs.hivebp.io/thumbnail?hash=${t.img}`} className="card" />
 												<div className="info">
 													<span className="name">{t?.name}</span>
 												</div>
@@ -255,7 +255,7 @@ export class Spy extends BasePage<unknown, SpyState> {
 									<h2 className="title">Land</h2>
 									<div className="holder">
 										<div className="land" key={`land-${this.state.land?.asset}`}>
-											<img src={`https://cloudflare-ipfs.com/ipfs/${this.state.land?.img}`} className="card" />
+											<img src={`https://ipfs.hivebp.io/thumbnail?hash=${this.state.land?.img}`} className="card" />
 											<div className="info">
 												<span className="name">{this.state.land?.name}</span>
 												<span className="planet">{`${this.state.land?.planet} (${this.state.land?.coordinates})`}</span>

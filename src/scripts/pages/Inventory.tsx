@@ -76,7 +76,7 @@ export class Inventory extends BasePage<unknown, InventoryState> {
 								<div className="holder">
 									{this.state.inventory?.map(t => (
 										<div className="tool" key={`inventory-${t?.tool?.template}`}>
-											<img src={`https://cloudflare-ipfs.com/ipfs/${t.tool.img}`} className="card" />
+											<img src={`https://ipfs.hivebp.io/thumbnail?hash=${t.tool.img}`} className="card" />
 											<div className="info">
 												<span className="name">{t?.tool?.name}</span>
 												<span className="count">{t?.count}</span>
