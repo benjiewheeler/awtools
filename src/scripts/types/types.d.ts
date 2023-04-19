@@ -87,11 +87,23 @@ export interface BalanceItem {
 export interface MineHistoryResponse {
 	actions: {
 		timestamp: string;
+		trx_id: string;
 		act: {
 			name: string;
-			data: { amount: number };
 		};
 	}[];
+}
+
+export interface TransactionHistoryResponse {
+	trx_id: string;
+	actions: {
+		act: { account: string; name: string; authorization: [{ actor: string; permission: string }]; data: unknown };
+		timestamp: string;
+	}[];
+}
+
+export interface MineHistoryTransactionItem {
+	trx_id: string;
 }
 
 export interface MineHistoryItem {

@@ -10,7 +10,7 @@ import { Footer } from "../components/Footer";
 import { Header } from "../components/Header";
 import { MineHistoryItem } from "../types/types";
 import { URLHashManager } from "../util/URLHashManager";
-import { fetchMineHistory } from "../util/utilities";
+import { fetchMineHistory, fetchTransaction } from "../util/utilities";
 import { BasePage } from "./BasePage";
 
 interface HistoryState {
@@ -86,7 +86,8 @@ export class History extends BasePage<unknown, HistoryState> {
 
 		try {
 			await (async () => {
-				const history = await fetchMineHistory(account, this.dateRef.current.value);
+				const transactions = await fetchMineHistory(account, this.dateRef.current.value);
+				const history = await Promise.all(transactions.map(t => fetchTransaction(t.trx_id)));
 				const chartData = _(history)
 					.groupBy(l => new Date(l?.date)?.getHours())
 					.mapValues((v, k) => ({ sum: _(v).sumBy(l => l.amount), count: v.length, hour: parseInt(k, 10) }));
@@ -243,7 +244,7 @@ export class History extends BasePage<unknown, HistoryState> {
 												<div className="datapoint" key={`history-${i}`}>
 													<span className="date">{moment(dp.date).format("DD MMM YYYY, HH:mm:ss zz")}</span>
 													<span className="amount">
-														{dp.amount.toLocaleString("en", { minimumFractionDigits: 4, maximumFractionDigits: 4 })}
+														{dp?.amount?.toLocaleString("en", { minimumFractionDigits: 4, maximumFractionDigits: 4 })}
 													</span>
 													<span
 														className={`change ${

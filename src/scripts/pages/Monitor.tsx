@@ -44,6 +44,9 @@ export class Monitor extends BasePage<unknown, MonitorState> {
 				this.setState({ account: null });
 				return;
 			}
+
+			this.setState({ account: e.detail });
+
 			this.forceRefresh(e.detail);
 		});
 	}
@@ -52,6 +55,7 @@ export class Monitor extends BasePage<unknown, MonitorState> {
 		const account = this.hashManager.getHashParam(URLHashManager.ACCOUNT_PARAM);
 
 		if (account) {
+			this.setState({ account });
 			this.forceRefresh(account);
 		}
 	}
@@ -131,8 +135,7 @@ export class Monitor extends BasePage<unknown, MonitorState> {
 			this.fetchTimeout = window.setTimeout(() => this.fetchAccount(this.state?.account), this.getIntervalValue("half"));
 			return;
 		}
-
-		this.setState({ loading: false, account });
+		this.setState({ loading: false });
 		this.fetchTimeout = window.setTimeout(() => this.fetchAccount(this.state?.account), this.getIntervalValue("full"));
 	}
 
@@ -223,7 +226,7 @@ export class Monitor extends BasePage<unknown, MonitorState> {
 									/>
 
 									<label className="sound-label" htmlFor="sound-field">
-										CPU Threshold
+										CPU Threshold (µs)
 									</label>
 
 									<input

@@ -22,7 +22,9 @@ import {
 	LandItem,
 	MineHistoryItem,
 	MineHistoryResponse,
+	MineHistoryTransactionItem,
 	ToolItem,
+	TransactionHistoryResponse,
 } from "../types/types";
 
 const ASSETS_PER_PAGE = 300;
@@ -30,54 +32,92 @@ const ASSETS_PER_PAGE = 300;
 const ENDPOINTS = {
 	get_actions: [
 		//
-		"https://wax.eosphere.io",
-		"https://wax.eu.eosamsterdam.net",
-		"https://api.waxsweden.org",
+		"https://apiwax.3dkrender.com",
+		"https://api.wax.alohaeos.com",
+		"https://hyperion.wax.blacklusion.io",
+		"https://wax.blokcrafters.io",
+		"https://hyperion-wax-mainnet.wecan.dev",
 		"https://wax.cryptolions.io",
+		"https://wax.eosdublin.io",
+		"https://wax.eosphere.io",
+		"https://api.wax.greeneosio.com",
+		"https://waxapi.ledgerwise.io",
+		"https://hyperion.wax.tgg.gg",
+		"https://api.waxeastern.cn",
+		"https://wax-api.eosiomadrid.io",
+		"https://wax-hyperion.wizardsguild.one",
 	],
 	get_account: [
 		//
 		"https://api.wax.alohaeos.com",
-		"https://api.wax.greeneosio.com",
-		"https://api.wax.liquidstudios.io",
-		"https://api.waxsweden.org",
-		"https://wax-bp.wizardsguild.one",
+		"https://wax.blacklusion.io",
+		"https://wax.blokcrafters.io",
+		"https://api.wax.bountyblok.io",
 		"https://wax.cryptolions.io",
+		"https://wax.eosdac.io",
+		"https://wax-api.eosiomadrid.io",
+		"https://wax.eosn.io",
+		"https://wax.api.eosnation.io",
+		"https://wax.eosphere.io",
+		"https://wax.eosusa.io",
+		"https://api.wax.greeneosio.com",
+		"https://wax.pink.gg",
+		"https://api.waxsweden.org",
+		"https://api.wax.liquidstudios.io",
+		"https://wax-bp.wizardsguild.one",
 		"https://wax.dapplica.io",
 		"https://wax.eoseoul.io",
-		"https://wax.eosn.io",
-		"https://wax.eosphere.io",
-		"https://wax.eu.eosamsterdam.net",
-		"https://wax.pink.gg",
 	],
 	get_info: [
 		//
 		"https://api.wax.alohaeos.com",
-		"https://api.wax.greeneosio.com",
-		"https://api.wax.liquidstudios.io",
-		"https://api.waxsweden.org",
-		"https://wax-bp.wizardsguild.one",
+		"https://wax.blacklusion.io",
+		"https://wax.blokcrafters.io",
+		"https://api.wax.bountyblok.io",
 		"https://wax.cryptolions.io",
-		"https://wax.dapplica.io",
-		"https://wax.eoseoul.io",
+		"https://wax.eosdac.io",
+		"https://wax-api.eosiomadrid.io",
 		"https://wax.eosn.io",
+		"https://wax.api.eosnation.io",
 		"https://wax.eosphere.io",
-		"https://wax.eu.eosamsterdam.net",
+		"https://wax.eosusa.io",
+		"https://api.wax.greeneosio.com",
 		"https://wax.pink.gg",
+		"https://api.waxsweden.org",
 	],
 	get_currency_balance: [
 		//
-		"https://api.waxsweden.org",
+		"https://api.wax.alohaeos.com",
+		"https://wax.blacklusion.io",
+		"https://wax.blokcrafters.io",
+		"https://api.wax.bountyblok.io",
 		"https://wax.cryptolions.io",
-		"https://wax.eu.eosamsterdam.net",
+		"https://wax.eosdac.io",
+		"https://wax-api.eosiomadrid.io",
+		"https://wax.eosn.io",
+		"https://wax.api.eosnation.io",
+		"https://wax.eosphere.io",
+		"https://wax.eosusa.io",
+		"https://api.wax.greeneosio.com",
 		"https://wax.pink.gg",
+		"https://api.waxsweden.org",
 	],
 	get_table_rows: [
 		//
-		"https://api.waxsweden.org",
+		"https://api.wax.alohaeos.com",
+		"https://wax.blacklusion.io",
+		"https://wax.blokcrafters.io",
+		"https://api.wax.bountyblok.io",
 		"https://wax.cryptolions.io",
-		"https://wax.eu.eosamsterdam.net",
+		"https://wax.eosdac.io",
+		"https://wax-api.eosiomadrid.io",
+		"https://wax.eosn.io",
+		"https://wax.api.eosnation.io",
+		"https://wax.eosphere.io",
+		"https://wax.eosusa.io",
+		"https://api.wax.greeneosio.com",
 		"https://wax.pink.gg",
+		"https://api.waxsweden.org",
 	],
 };
 
@@ -209,9 +249,10 @@ export function calculateToolsDelay(tools: ToolItem[]): number {
 	return _.sum(delays) - _.min(delays);
 }
 
-export async function fetchMineHistory(account: string, date: string): Promise<MineHistoryItem[]> {
+export async function fetchMineHistory(account: string, date: string): Promise<MineHistoryTransactionItem[]> {
 	const key = `history_${account}_${date}`;
-	const cache = getStorageItem<MineHistoryItem[]>(key);
+	const cache = getStorageItem<MineHistoryTransactionItem[]>(key);
+
 	if (cache) {
 		return cache;
 	}
@@ -229,26 +270,46 @@ export async function fetchMineHistory(account: string, date: string): Promise<M
 
 	const response = await axios.get<MineHistoryResponse>(url, {
 		params: {
-			"account": account,
-			"skip": 0,
-			"limit": 500,
-			"sort": "desc",
-			"after": dayStart.toISOString(),
-			"before": dayEnd.toISOString(),
-			"transfer.to": account,
-			"transfer.from": "m.federation",
+			account: account,
+			filter: "m.federation:mine",
+			skip: 0,
+			limit: 500,
+			sort: "desc",
+			after: dayStart.toISOString(),
+			before: dayEnd.toISOString(),
 		},
 		timeout: 10e3,
 	});
 
-	const history = response?.data?.actions
-		?.filter(m => m.act.name === "transfer")
-		?.map(m => ({
-			date: new Date(`${m.timestamp}Z`),
-			amount: m?.act?.data?.amount,
-		}));
+	const history = response?.data?.actions?.filter(m => m.act.name === "mine")?.map(m => ({ trx_id: m?.trx_id }));
 
 	setStorageItem(key, history, Date.now() - dayStart.getTime() > 864e5 ? 3600 : 10);
+	return history;
+}
+
+export async function fetchTransaction(txid: string): Promise<MineHistoryItem> {
+	const key = `history_${txid?.slice(0, 16)}`;
+	const cache = getStorageItem<MineHistoryItem>(key);
+	console.log("fetchTransaction", { key, cache });
+
+	if (cache) {
+		return cache;
+	}
+
+	const endpoint = _.sample(ENDPOINTS.get_actions);
+	const url = `${endpoint}/v2/history/get_transaction`;
+
+	const response = await axios.get<TransactionHistoryResponse>(url, { params: { id: txid }, timeout: 10e3 });
+
+	const notification = response?.data?.actions?.find(a => a.act.account == "notify.world" && a.act.name == "logmine");
+	const data = (notification?.act?.data as any)?.data || notification?.act?.data;
+
+	const history: MineHistoryItem = {
+		date: new Date(notification?.timestamp),
+		amount: parseFloat(data?.bounty),
+	};
+
+	if (history.amount) setStorageItem(key, history);
 	return history;
 }
 
@@ -412,7 +473,7 @@ function getStorageItem<T>(key: string, defaultValue?: T): T {
 	try {
 		const json = localStorage.getItem(key);
 		const obj: CacheObject<T> = JSON.parse(json);
-		if (obj?.expiration < Date.now()) {
+		if (obj?.expiration && obj?.expiration < Date.now()) {
 			return defaultValue;
 		}
 		if (obj?.value === null || obj?.value === undefined) {
