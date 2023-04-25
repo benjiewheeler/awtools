@@ -127,7 +127,7 @@ export class Spy extends BasePage<unknown, SpyState> {
 			units.shift();
 		}
 
-		return units.map(n => n.toString().padStart(2, "0")).join(":");
+		return units.map(n => (n || 0).toString().padStart(2, "0")).join(":");
 	}
 
 	render(): JSX.Element {
@@ -173,7 +173,7 @@ export class Spy extends BasePage<unknown, SpyState> {
 												className="progress"
 												style={{ flexBasis: `${(this.state?.info?.cpu?.used / this.state?.info?.cpu?.total) * 100}%` }}
 											>
-												{`${_.round((this.state?.info?.cpu?.used / this.state?.info?.cpu?.total) * 100, 1)}%`}
+												{`${_.round((this.state?.info?.cpu?.used / this.state?.info?.cpu?.total || 0) * 100, 1)}%`}
 											</div>
 										</div>
 										<div className="details">
@@ -191,7 +191,7 @@ export class Spy extends BasePage<unknown, SpyState> {
 												className="progress"
 												style={{ flexBasis: `${(this.state?.info?.net?.used / this.state?.info?.net?.total) * 100}%` }}
 											>
-												{`${_.round((this.state?.info?.net?.used / this.state?.info?.net?.total) * 100, 1)}%`}
+												{`${_.round((this.state?.info?.net?.used / this.state?.info?.net?.total || 0) * 100, 1)}%`}
 											</div>
 										</div>
 										<div className="details">

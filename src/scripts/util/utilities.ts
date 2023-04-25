@@ -35,7 +35,6 @@ const ENDPOINTS = {
 		"https://apiwax.3dkrender.com",
 		"https://api.wax.alohaeos.com",
 		"https://hyperion.wax.blacklusion.io",
-		"https://wax.blokcrafters.io",
 		"https://hyperion-wax-mainnet.wecan.dev",
 		"https://wax.cryptolions.io",
 		"https://wax.eosdublin.io",
@@ -43,7 +42,6 @@ const ENDPOINTS = {
 		"https://api.wax.greeneosio.com",
 		"https://waxapi.ledgerwise.io",
 		"https://hyperion.wax.tgg.gg",
-		"https://api.waxeastern.cn",
 		"https://wax-api.eosiomadrid.io",
 		"https://wax-hyperion.wizardsguild.one",
 	],
@@ -64,7 +62,6 @@ const ENDPOINTS = {
 		"https://wax.pink.gg",
 		"https://api.waxsweden.org",
 		"https://api.wax.liquidstudios.io",
-		"https://wax-bp.wizardsguild.one",
 		"https://wax.dapplica.io",
 		"https://wax.eoseoul.io",
 	],
@@ -119,42 +116,81 @@ const ENDPOINTS = {
 		"https://wax.pink.gg",
 		"https://api.waxsweden.org",
 	],
+	atomicassets: [
+		//
+		"https://atomic.3dkrender.com",
+		"https://wax.api.atomicassets.io",
+		"https://aa.wax.blacklusion.io",
+		"https://wax.blokcrafters.io",
+		"https://atomic-api.wax.cryptolions.io",
+		"https://aa.dapplica.io",
+		"https://atomic.wax.detroitledger.tech",
+		"https://wax-aa.eu.eosamsterdam.net",
+		"https://wax-aa.eosdac.io",
+		"https://wax-aa.eosdublin.io",
+		"https://wax-atomic-api.eosphere.io",
+		"https://wax.eosusa.io",
+		"https://api.atomic.greeneosio.com",
+		"https://atomic.hivebp.io",
+		"https://atomic3.hivebp.io",
+		"https://atomicassets.ledgerwise.io",
+		"https://atomic.oiac.io",
+		"https://atomic.sentnl.io",
+		"https://atomic-wax-mainnet.wecan.dev",
+		"https://wax-atomic.wizardsguild.one",
+	],
 };
 
-export async function fetchToolAsset(asset: string): Promise<ToolItem> {
+export async function waitFor(millis: number): Promise<void> {
+	return new Promise<void>(resolve => setTimeout(() => resolve(), millis));
+}
+
+export async function fetchToolAsset(asset: string, wait = 500): Promise<ToolItem> {
 	const key = `asset_${asset}`;
 	const cache = getStorageItem<ToolItem>(key);
 	if (cache) {
 		return cache;
 	}
-	const url = `https://wax.api.atomicassets.io/atomicassets/v1/assets/${asset}`;
-	const response = await axios.get<AssetInfoResponse>(url, { timeout: 10e3 });
+	try {
+		const endpoint = _.sample(ENDPOINTS.atomicassets);
+		const url = `${endpoint}/atomicassets/v1/assets/${asset}`;
+		const response = await axios.get<AssetInfoResponse>(url, { timeout: 10e3 });
 
-	const tool = findTool(response?.data?.data?.template.template_id, asset);
-	setStorageItem(key, tool, 3600);
-	return tool;
+		const tool = findTool(response?.data?.data?.template.template_id, asset);
+		setStorageItem(key, tool, 3600);
+		return tool;
+	} catch (error) {
+		await waitFor(Math.floor(wait));
+		return fetchToolAsset(asset, wait * 1.5);
+	}
 }
 
-export async function getInventoryTemplates(account: string): Promise<InventoryTemplateItem[]> {
+export async function getInventoryTemplates(account: string, wait = 500): Promise<InventoryTemplateItem[]> {
 	const key = `inventory_templates_${account}`;
 	const cache = getStorageItem<InventoryTemplateItem[]>(key);
 	if (cache) {
 		return cache;
 	}
 
-	const url = `https://wax.api.atomicassets.io/atomicassets/v1/accounts/${account}/alien.worlds`;
-	const response = await axios.get<InventoryTemplatesResponse>(url, { timeout: 10e3 });
+	try {
+		const endpoint = _.sample(ENDPOINTS.atomicassets);
+		const url = `${endpoint}/atomicassets/v1/accounts/${account}/alien.worlds`;
+		const response = await axios.get<InventoryTemplatesResponse>(url, { timeout: 10e3 });
 
-	const templates = response?.data?.data?.templates?.map(t => ({
-		template: t.template_id,
-		count: parseInt(t.assets),
-	}));
+		const templates = response?.data?.data?.templates?.map(t => ({
+			template: t.template_id,
+			count: parseInt(t.assets),
+		}));
 
-	setStorageItem(key, templates, 300);
-	return templates;
+		setStorageItem(key, templates, 300);
+		return templates;
+	} catch (error) {
+		await waitFor(Math.floor(wait));
+		return getInventoryTemplates(account, wait * 1.5);
+	}
 }
 
-async function fetchInventoryAssetsPage(account: string, page = 1): Promise<InventoryAssetItem[]> {
+async function fetchInventoryAssetsPage(account: string, page = 1, wait = 500): Promise<InventoryAssetItem[]> {
 	if (!account?.trim()?.length) {
 		return [];
 	}
@@ -165,27 +201,33 @@ async function fetchInventoryAssetsPage(account: string, page = 1): Promise<Inve
 		return cache;
 	}
 
-	const url = `https://wax.api.atomicassets.io/atomicassets/v1/assets`;
-	const response = await axios.get<InventoryAssetsResponse>(url, {
-		params: {
-			owner: account,
-			collection_name: "alien.worlds",
-			schema_name: "tool.worlds",
-			page,
-			limit: ASSETS_PER_PAGE,
-			order: "desc",
-			sort: "transferred",
-		},
-		timeout: 10e3,
-	});
+	try {
+		const endpoint = _.sample(ENDPOINTS.atomicassets);
+		const url = `${endpoint}/atomicassets/v1/assets`;
+		const response = await axios.get<InventoryAssetsResponse>(url, {
+			params: {
+				owner: account,
+				collection_name: "alien.worlds",
+				schema_name: "tool.worlds",
+				page,
+				limit: ASSETS_PER_PAGE,
+				order: "desc",
+				sort: "transferred",
+			},
+			timeout: 10e3,
+		});
 
-	const assets = response?.data?.data?.map(a => ({
-		asset: a.asset_id,
-		template: a.template.template_id,
-	}));
+		const assets = response?.data?.data?.map(a => ({
+			asset: a.asset_id,
+			template: a.template.template_id,
+		}));
 
-	setStorageItem(key, assets, 300);
-	return assets;
+		setStorageItem(key, assets, 300);
+		return assets;
+	} catch (error) {
+		await waitFor(Math.floor(wait));
+		return fetchInventoryAssetsPage(account, page, wait * 1.5);
+	}
 }
 
 export async function getInventoryAssets(account: string): Promise<InventoryAssetItem[]> {
@@ -249,7 +291,7 @@ export function calculateToolsDelay(tools: ToolItem[]): number {
 	return _.sum(delays) - _.min(delays);
 }
 
-export async function fetchMineHistory(account: string, date: string): Promise<MineHistoryTransactionItem[]> {
+export async function fetchMineHistory(account: string, date: string, wait = 500): Promise<MineHistoryTransactionItem[]> {
 	const key = `history_${account}_${date}`;
 	const cache = getStorageItem<MineHistoryTransactionItem[]>(key);
 
@@ -257,91 +299,122 @@ export async function fetchMineHistory(account: string, date: string): Promise<M
 		return cache;
 	}
 
-	const endpoint = _.sample(ENDPOINTS.get_actions);
-	const url = `${endpoint}/v2/history/get_actions`;
+	try {
+		const endpoint = _.sample(ENDPOINTS.get_actions);
+		const url = `${endpoint}/v2/history/get_actions`;
 
-	const dayStart = new Date(date);
-	dayStart.setHours(0);
-	dayStart.setMinutes(0);
-	dayStart.setSeconds(0);
-	dayStart.setMilliseconds(0);
+		const dayStart = new Date(date);
+		dayStart.setHours(0);
+		dayStart.setMinutes(0);
+		dayStart.setSeconds(0);
+		dayStart.setMilliseconds(0);
 
-	const dayEnd = new Date(dayStart.getTime() + 864e5 - 1);
+		const dayEnd = new Date(dayStart.getTime() + 864e5 - 1);
 
-	const response = await axios.get<MineHistoryResponse>(url, {
-		params: {
-			account: account,
-			filter: "m.federation:mine",
-			skip: 0,
-			limit: 500,
-			sort: "desc",
-			after: dayStart.toISOString(),
-			before: dayEnd.toISOString(),
-		},
-		timeout: 10e3,
-	});
+		const response = await axios.get<MineHistoryResponse>(url, {
+			params: {
+				account: account,
+				filter: "m.federation:mine",
+				skip: 0,
+				limit: 500,
+				sort: "desc",
+				after: dayStart.toISOString(),
+				before: dayEnd.toISOString(),
+			},
+			timeout: 5e3,
+		});
 
-	const history = response?.data?.actions?.filter(m => m.act.name === "mine")?.map(m => ({ trx_id: m?.trx_id }));
+		const history = response?.data?.actions?.filter(m => m.act.name === "mine")?.map(m => ({ trx_id: m?.trx_id }));
 
-	setStorageItem(key, history, Date.now() - dayStart.getTime() > 864e5 ? 3600 : 10);
-	return history;
+		setStorageItem(key, history, Date.now() - dayStart.getTime() > 864e5 ? 86400 : 60);
+		return history;
+	} catch (error) {
+		await waitFor(Math.floor(wait));
+		return await fetchMineHistory(account, date, wait * 1.5);
+	}
 }
 
-export async function fetchTransaction(txid: string): Promise<MineHistoryItem> {
+export async function fetchTransaction(txid: string, wait = 500): Promise<MineHistoryItem> {
 	const key = `history_${txid?.slice(0, 16)}`;
 	const cache = getStorageItem<MineHistoryItem>(key);
-	console.log("fetchTransaction", { key, cache });
 
 	if (cache) {
 		return cache;
 	}
 
-	const endpoint = _.sample(ENDPOINTS.get_actions);
-	const url = `${endpoint}/v2/history/get_transaction`;
+	try {
+		const endpoint = _.sample(ENDPOINTS.get_actions);
+		const url = `${endpoint}/v2/history/get_transaction`;
+		const t0 = Date.now();
+		const response = await axios.get<TransactionHistoryResponse>(url, { params: { id: txid }, timeout: 5e3 });
 
-	const response = await axios.get<TransactionHistoryResponse>(url, { params: { id: txid }, timeout: 10e3 });
+		const notification = response?.data?.actions
+			?.filter(a => a.act.name == "logmine")
+			?.filter(a => a.act.account == "notify.world" || a.act.account == "m.federation")
+			?.shift();
 
-	const notification = response?.data?.actions?.find(a => a.act.account == "notify.world" && a.act.name == "logmine");
-	const data = (notification?.act?.data as any)?.data || notification?.act?.data;
+		if (!notification) throw "No actions";
 
-	const history: MineHistoryItem = {
-		date: new Date(notification?.timestamp),
-		amount: parseFloat(data?.bounty),
-	};
+		const data = (notification?.act?.data as any)?.data || notification?.act?.data;
 
-	if (history.amount) setStorageItem(key, history);
-	return history;
+		const history: MineHistoryItem = {
+			date: new Date(`${notification?.timestamp}Z`),
+			amount: parseFloat(data?.bounty),
+		};
+
+		const t1 = Date.now();
+		if (history.amount) {
+			console.log(`Saving tx ${txid}`, t1 - t0, new URL(`${endpoint}`).hostname);
+			setStorageItem(key, history);
+		}
+
+		return history;
+	} catch (error) {
+		await waitFor(wait);
+		return await fetchTransaction(txid, wait * 1.5);
+	}
 }
 
-export async function fetchInventoryValue(account: string): Promise<number> {
+export async function fetchInventoryValue(account: string, wait = 500): Promise<number> {
 	const key = `inventory_value_${account}`;
 	const cache = getStorageItem<number>(key);
 	if (cache) {
 		return cache;
 	}
 
-	const url = `https://wax.api.atomicassets.io/atomicmarket/v1/prices/assets`;
-	const response = await axios.get<InventoryValueResponse>(url, {
-		params: { owner: account, collection_name: "alien.worlds", schema_name: "tool.worlds" },
-		timeout: 10e3,
-	});
+	try {
+		const endpoint = _.sample(ENDPOINTS.atomicassets);
+		const url = `${endpoint}/atomicmarket/v1/prices/assets`;
+		const response = await axios.get<InventoryValueResponse>(url, {
+			params: { owner: account, collection_name: "alien.worlds", schema_name: "tool.worlds" },
+			timeout: 10e3,
+		});
 
-	const apiData = response?.data?.data[0];
+		const apiData = response?.data?.data[0];
 
-	const data = parseInt(apiData?.suggested_median, 10) / Math.pow(10, apiData?.token_precision);
-	setStorageItem(key, data, 600);
-	return data;
+		const data = parseInt(apiData?.suggested_median, 10) / Math.pow(10, apiData?.token_precision);
+		setStorageItem(key, data, 600);
+		return data;
+	} catch (error) {
+		await waitFor(wait);
+		return await fetchInventoryValue(account, wait * 1.5);
+	}
 }
 
-export async function fetchTokenBalance(code: string, account: string, symbol: string): Promise<number> {
-	const endpoint = _.sample(ENDPOINTS.get_currency_balance);
-	const url = `${endpoint}/v1/chain/get_currency_balance`;
-	const response = await axios.post<string[]>(url, { code, account, symbol }, { timeout: 10e3 });
+export async function fetchTokenBalance(code: string, account: string, symbol: string, wait = 500): Promise<number> {
+	try {
+		const endpoint = _.sample(ENDPOINTS.get_currency_balance);
+		const url = `${endpoint}/v1/chain/get_currency_balance`;
+		const response = await axios.post<string[]>(url, { code, account, symbol }, { timeout: 10e3 });
 
-	return parseFloat(response?.data?.pop());
+		return parseFloat(response?.data?.pop());
+	} catch (error) {
+		await waitFor(wait);
+		return await fetchTokenBalance(code, account, symbol, wait * 1.5);
+	}
 }
 
-export async function fetchAccountInfo(account: string, forceFetch = false): Promise<AccountInfoItem> {
+export async function fetchAccountInfo(account: string, forceFetch = false, wait = 500): Promise<AccountInfoItem> {
 	const key = `info_${account}`;
 
 	if (!forceFetch) {
@@ -351,41 +424,51 @@ export async function fetchAccountInfo(account: string, forceFetch = false): Pro
 		}
 	}
 
-	const endpoint = _.sample(ENDPOINTS.get_account);
-	const url = `${endpoint}/v1/chain/get_account`;
-	const response = await axios.post<AccountInfoResponse>(url, { account_name: account }, { timeout: 10e3 });
+	try {
+		const endpoint = _.sample(ENDPOINTS.get_account);
+		const url = `${endpoint}/v1/chain/get_account`;
+		const response = await axios.post<AccountInfoResponse>(url, { account_name: account }, { timeout: 10e3 });
 
-	const info = {
-		created: new Date(response?.data?.created),
-		cpu: {
-			total: response?.data?.cpu_limit?.max,
-			used: response?.data?.cpu_limit?.used,
-			staked: parseInt(response?.data?.cpu_weight, 10) / 1e8,
-		},
-		ram: {
-			total: response?.data?.ram_quota,
-			used: response?.data?.ram_usage,
-		},
-		net: {
-			total: response?.data?.net_limit?.max,
-			used: response?.data?.net_limit?.used,
-			staked: response?.data?.net_weight / 1e8,
-		},
-	};
-	setStorageItem(key, info, 60);
-	return info;
+		const info = {
+			created: new Date(response?.data?.created),
+			cpu: {
+				total: response?.data?.cpu_limit?.max,
+				used: response?.data?.cpu_limit?.used,
+				staked: parseInt(response?.data?.cpu_weight, 10) / 1e8,
+			},
+			ram: {
+				total: response?.data?.ram_quota,
+				used: response?.data?.ram_usage,
+			},
+			net: {
+				total: response?.data?.net_limit?.max,
+				used: response?.data?.net_limit?.used,
+				staked: response?.data?.net_weight / 1e8,
+			},
+		};
+		setStorageItem(key, info, 60);
+		return info;
+	} catch (error) {
+		await waitFor(wait);
+		return await fetchAccountInfo(account, forceFetch, wait * 1.5);
+	}
 }
 
-export async function fetchChainInfo(): Promise<ChainInfoItem> {
-	const endpoint = _.sample(ENDPOINTS.get_info);
-	const url = `${endpoint}/v1/chain/get_info`;
-	const response = await axios.post<ChainInfoResponse>(url, {}, { timeout: 10e3 });
+export async function fetchChainInfo(wait = 500): Promise<ChainInfoItem> {
+	try {
+		const endpoint = _.sample(ENDPOINTS.get_info);
+		const url = `${endpoint}/v1/chain/get_info`;
+		const response = await axios.post<ChainInfoResponse>(url, {}, { timeout: 10e3 });
 
-	const info: ChainInfoItem = {
-		virtualCPULimit: response?.data?.virtual_block_cpu_limit,
-	};
+		const info: ChainInfoItem = {
+			virtualCPULimit: response?.data?.virtual_block_cpu_limit,
+		};
 
-	return info;
+		return info;
+	} catch (error) {
+		await waitFor(wait);
+		return await fetchChainInfo(wait * 1.5);
+	}
 }
 
 export async function fetchBalances(account: string): Promise<BalanceItem> {
@@ -402,59 +485,69 @@ export async function fetchBalances(account: string): Promise<BalanceItem> {
 	return balances;
 }
 
-export async function fetchBag(account: string): Promise<ToolItem[]> {
+export async function fetchBag(account: string, wait = 500): Promise<ToolItem[]> {
 	const key = `bag_${account}`;
 	const cache = getStorageItem<ToolItem[]>(key);
 	if (cache) {
 		return cache;
 	}
 
-	const endpoint = _.sample(ENDPOINTS.get_table_rows);
-	const url = `${endpoint}/v1/chain/get_table_rows`;
-	const response = await axios.post<AccountBagResponse>(
-		url,
-		{
-			code: "m.federation",
-			json: true,
-			limit: 10,
-			lower_bound: account,
-			scope: "m.federation",
-			table: "bags",
-			upper_bound: account,
-		},
-		{ timeout: 10e3 }
-	);
-	const tools = await async.map<string, ToolItem>(response?.data?.rows[0].items, async a => await fetchToolAsset(a));
-	setStorageItem(key, tools, 300);
-	return tools;
+	try {
+		const endpoint = _.sample(ENDPOINTS.get_table_rows);
+		const url = `${endpoint}/v1/chain/get_table_rows`;
+		const response = await axios.post<AccountBagResponse>(
+			url,
+			{
+				code: "m.federation",
+				json: true,
+				limit: 10,
+				lower_bound: account,
+				scope: "m.federation",
+				table: "bags",
+				upper_bound: account,
+			},
+			{ timeout: 10e3 }
+		);
+		const tools = await async.map<string, ToolItem>(response?.data?.rows[0].items, async a => await fetchToolAsset(a));
+		setStorageItem(key, tools, 300);
+		return tools;
+	} catch (error) {
+		await waitFor(wait);
+		return await fetchBag(account, wait * 1.5);
+	}
 }
 
-export async function fetchLand(account: string): Promise<LandItem> {
+export async function fetchLand(account: string, wait = 500): Promise<LandItem> {
 	const key = `land_${account}`;
 	const cache = getStorageItem<LandItem>(key);
 	if (cache) {
 		return cache;
 	}
 
-	const endpoint = _.sample(ENDPOINTS.get_table_rows);
-	const url = `${endpoint}/v1/chain/get_table_rows`;
-	const response = await axios.post<AccountMinersResponse>(
-		url,
-		{
-			code: "m.federation",
-			json: true,
-			limit: 10,
-			lower_bound: account,
-			scope: "m.federation",
-			table: "miners",
-			upper_bound: account,
-		},
-		{ timeout: 10e3 }
-	);
+	try {
+		const endpoint = _.sample(ENDPOINTS.get_table_rows);
+		const url = `${endpoint}/v1/chain/get_table_rows`;
+		const response = await axios.post<AccountMinersResponse>(
+			url,
+			{
+				code: "m.federation",
+				json: true,
+				limit: 10,
+				lower_bound: account,
+				scope: "m.federation",
+				table: "miners",
+				upper_bound: account,
+			},
+			{ timeout: 10e3 }
+		);
 
-	const land = findLand(response?.data?.rows[0]?.current_land);
-	setStorageItem(key, land, 300);
-	return land;
+		const land = findLand(response?.data?.rows[0]?.current_land);
+		setStorageItem(key, land, 300);
+		return land;
+	} catch (error) {
+		await waitFor(wait);
+		return await fetchLand(account, wait * 1.5);
+	}
 }
 
 function setStorageItem<T>(key: string, value: T, expiration: number = null): void {

@@ -2,7 +2,6 @@ import G from "generatorics";
 import _ from "lodash";
 import React from "react";
 import ReactDOM from "react-dom";
-import { WaxAuthClient } from "wax-auth-client";
 import "../../style/builder.less";
 import { Error } from "../components/Error";
 import { Footer } from "../components/Footer";
@@ -24,13 +23,9 @@ interface BuilderState {
 }
 
 export class Spy extends BasePage<unknown, BuilderState> {
-	private auth: WaxAuthClient;
-
 	constructor(props: unknown) {
 		super(props);
 		this.state = { sortParam: "power", order: "desc" };
-
-		this.auth = new WaxAuthClient();
 
 		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 		// @ts-ignore
@@ -40,12 +35,6 @@ export class Spy extends BasePage<unknown, BuilderState> {
 	}
 
 	async componentDidMount(): Promise<void> {
-		this.auth.wax.isAutoLoginAvailable().then(autoLogin => {
-			if (autoLogin) {
-				this.auth.loginWax();
-			}
-		});
-
 		const account = this.hashManager.getHashParam(URLHashManager.ACCOUNT_PARAM);
 
 		if (account) {
@@ -95,7 +84,7 @@ export class Spy extends BasePage<unknown, BuilderState> {
 				.sortBy()
 				.map(combo => combo.split(","))
 				.map(set => set.map(id => _(inventory).find(a => a.asset == id)))
-				.map(set => set.map(t => findTool(t.template, t.asset)))
+				.map(set => set.map(t => findTool(t?.template, t?.asset)))
 				.uniqBy(set =>
 					set
 						.map(t => t.template)
@@ -114,37 +103,6 @@ export class Spy extends BasePage<unknown, BuilderState> {
 	setSortingParam(param: string): void {
 		const order = this.state.sortParam != param ? "desc" : this.state.order === "asc" ? "desc" : "asc";
 		this.setState({ sortParam: param, order });
-	}
-
-	async setBag(tools: ToolItem[]): Promise<void> {
-		const toolAssets = _(tools)
-			.map(t => t.asset)
-			.value();
-
-		const waxAddress = await this.auth.loginWax();
-
-		if (waxAddress !== this.state.account) {
-			alert("You have no access to the selected account");
-			return;
-		}
-
-		try {
-			const result = await this.auth.wax.api.transact(
-				{
-					actions: [
-						{
-							account: "m.federation",
-							name: "setbag",
-							authorization: [{ actor: waxAddress, permission: "active" }],
-							data: { account: waxAddress, items: toolAssets },
-						},
-					],
-				},
-				{ blocksBehind: 0, expireSeconds: 1200 }
-			);
-		} catch (error) {
-			alert(error);
-		}
 	}
 
 	render(): JSX.Element {
@@ -238,7 +196,7 @@ export class Spy extends BasePage<unknown, BuilderState> {
 												)
 												.map(({ tools, stats }) => (
 													<tr className="build" key={tools.map(t => t.template).join(",")}>
-														<td onClick={() => this.setBag(tools)} className="tools">
+														<td className="tools">
 															{tools
 																.sort((a, b) => a.name.localeCompare(b.name))
 																.map((tool, i) => (

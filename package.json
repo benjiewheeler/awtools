@@ -12,7 +12,7 @@
 		"build.watch": "webpack serve --progress --hot --mode development"
 	},
 	"dependencies": {
-		"async": "^3.2.0",
+		"async": "^3.2.4",
 		"axios": "^0.21.2",
 		"chart.js": "^3.5.0",
 		"filesize": "^6.3.0",
@@ -21,8 +21,7 @@
 		"moment": "^2.29.1",
 		"react": "^16.13.1",
 		"react-chartjs-2": "^3.0.4",
-		"react-dom": "^16.13.1",
-		"wax-auth-client": "^0.1.9"
+		"react-dom": "^16.13.1"
 	},
 	"devDependencies": {
 		"@types/async": "^3.2.5",

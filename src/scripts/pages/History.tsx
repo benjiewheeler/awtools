@@ -1,14 +1,15 @@
+import async from "async";
 import { ChartData, ChartOptions } from "chart.js";
 import _ from "lodash";
 import moment from "moment";
-import React, { createRef, RefObject } from "react";
+import React, { RefObject, createRef } from "react";
 import { Bar } from "react-chartjs-2";
 import ReactDOM from "react-dom";
 import "../../style/history.less";
 import { Error } from "../components/Error";
 import { Footer } from "../components/Footer";
 import { Header } from "../components/Header";
-import { MineHistoryItem } from "../types/types";
+import { MineHistoryItem, MineHistoryTransactionItem } from "../types/types";
 import { URLHashManager } from "../util/URLHashManager";
 import { fetchMineHistory, fetchTransaction } from "../util/utilities";
 import { BasePage } from "./BasePage";
@@ -86,11 +87,20 @@ export class History extends BasePage<unknown, HistoryState> {
 
 		try {
 			await (async () => {
-				const transactions = await fetchMineHistory(account, this.dateRef.current.value);
-				const history = await Promise.all(transactions.map(t => fetchTransaction(t.trx_id)));
+				const date = this.dateRef.current.value;
+				const transactions = await fetchMineHistory(account, date);
+				const history = await async.mapLimit<MineHistoryTransactionItem, MineHistoryItem>(
+					transactions,
+					8,
+					async t => await fetchTransaction(t.trx_id)
+				);
 				const chartData = _(history)
 					.groupBy(l => new Date(l?.date)?.getHours())
 					.mapValues((v, k) => ({ sum: _(v).sumBy(l => l.amount), count: v.length, hour: parseInt(k, 10) }));
+
+				if (date != this.dateRef.current.value) {
+					return;
+				}
 
 				this.setState({
 					miningHistory: history,
@@ -178,9 +188,11 @@ export class History extends BasePage<unknown, HistoryState> {
 							<input
 								ref={this.dateRef}
 								type="date"
-								defaultValue={this.state?.date.toISOString().split("T")[0]}
+								defaultValue={this.state?.date?.toISOString().split("T")[0]}
 								className="date-field"
-								onChange={e => this.fetchAccount(this.state?.account) && this.setState({ date: new Date(e.target.value) })}
+								onChange={e =>
+									this.fetchAccount(this.state?.account) && this.setState({ date: new Date(e.target.value || Date.now()) })
+								}
 							/>
 						</div>
 					</div>
@@ -243,9 +255,7 @@ export class History extends BasePage<unknown, HistoryState> {
 											{this.state.miningHistory.map((dp, i, list) => (
 												<div className="datapoint" key={`history-${i}`}>
 													<span className="date">{moment(dp.date).format("DD MMM YYYY, HH:mm:ss zz")}</span>
-													<span className="amount">
-														{dp?.amount?.toLocaleString("en", { minimumFractionDigits: 4, maximumFractionDigits: 4 })}
-													</span>
+													<span className="amount">{dp?.amount?.toFixed(4)}</span>
 													<span
 														className={`change ${
 															this.calculateChange(dp.amount, list[i + 1]?.amount) > 0

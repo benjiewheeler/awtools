@@ -5,6 +5,7 @@
 		"lib": [],
 		"rootDir": "./",
 		"strict": false,
+		"strictNullChecks": false,
 		"allowSyntheticDefaultImports": true,
 		"esModuleInterop": true
 	},
