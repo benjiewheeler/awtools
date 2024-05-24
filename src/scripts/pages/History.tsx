@@ -87,6 +87,7 @@ export class History extends BasePage<unknown, HistoryState> {
 
 		try {
 			await (async () => {
+				// @ts-ignore
 				const date = this.dateRef.current.value;
 				const transactions = await fetchMineHistory(account, date);
 				const history = await async.mapLimit<MineHistoryTransactionItem, MineHistoryItem>(
@@ -98,6 +99,7 @@ export class History extends BasePage<unknown, HistoryState> {
 					.groupBy(l => new Date(l?.date)?.getHours())
 					.mapValues((v, k) => ({ sum: _(v).sumBy(l => l.amount), count: v.length, hour: parseInt(k, 10) }));
 
+				// @ts-ignore
 				if (date != this.dateRef.current.value) {
 					return;
 				}
@@ -191,6 +193,7 @@ export class History extends BasePage<unknown, HistoryState> {
 								defaultValue={this.state?.date?.toISOString().split("T")[0]}
 								className="date-field"
 								onChange={e =>
+									// @ts-ignore
 									this.fetchAccount(this.state?.account) && this.setState({ date: new Date(e.target.value || Date.now()) })
 								}
 							/>
@@ -205,7 +208,9 @@ export class History extends BasePage<unknown, HistoryState> {
 										<div className="holder">
 											<div className="container">
 												<Bar
+													// @ts-ignore
 													data={this.state?.chartData}
+													// @ts-ignore
 													options={this.state?.chartOptions}
 													style={{ maxHeight: 500, maxWidth: 1000, minWidth: 340 }}
 												/>
